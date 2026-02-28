@@ -74,6 +74,7 @@ def fetch_metadata(url: str) -> VideoMetadata:
         "skip_download": True,
         "quiet": True,
         "no_warnings": True,
+        "js_runtimes": {"node": {}},
     }
     if YTDLP_COOKIES_FILE:
         opts["cookiefile"] = YTDLP_COOKIES_FILE
@@ -118,6 +119,7 @@ def download_video(url: str, output_dir: Path) -> Path:
         "retries": YTDLP_RETRIES,
         "quiet": True,
         "no_warnings": True,
+        "js_runtimes": {"node": {}},
     }
     if YTDLP_COOKIES_FILE:
         opts["cookiefile"] = YTDLP_COOKIES_FILE
