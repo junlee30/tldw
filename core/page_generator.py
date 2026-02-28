@@ -51,16 +51,17 @@ def _build_template_context(
     output_dir: Path,
 ) -> dict:
     """Build the context dictionary for the Jinja2 template."""
-    cards = []
+    scenes = []
     for i, (card_path, segment) in enumerate(
         zip(card_paths, analysis.segments)
     ):
         # Use relative path from output dir
         rel_path = card_path.relative_to(output_dir)
-        cards.append({
+        scenes.append({
             "image_path": str(rel_path).replace("\\", "/"),
             "headline": segment.headline,
-            "summary": segment.summary,
+            "narration": segment.narration,
+            "transition": segment.transition if i > 0 else "",
             "timestamp_display": segment.timestamp_display,
             "youtube_url": _build_youtube_timestamp_url(
                 metadata.video_id, segment.timestamp
@@ -76,8 +77,10 @@ def _build_template_context(
         "upload_date": _format_date(metadata.upload_date),
         "description": metadata.description[:200],
         "title_summary": analysis.title_summary,
-        "overall_summary": analysis.overall_summary,
-        "cards": cards,
+        "prologue": analysis.prologue,
+        "epilogue": analysis.epilogue,
+        "language": analysis.language,
+        "scenes": scenes,
         "og_image": og_filename,
         "video_url": f"https://www.youtube.com/watch?v={metadata.video_id}",
         "video_id": metadata.video_id,

@@ -10,7 +10,6 @@ from config import (
     OG_HEIGHT,
     FONT_BOLD,
     FONT_REGULAR,
-    DARKEN_FACTOR,
 )
 
 logger = logging.getLogger(__name__)
@@ -58,7 +57,7 @@ def _draw_branding_overlay(
 
     # Darken the image
     enhancer = ImageEnhance.Brightness(image)
-    img = enhancer.enhance(DARKEN_FACTOR)
+    img = enhancer.enhance(0.55)
     img = img.convert("RGBA")
 
     # Bottom gradient

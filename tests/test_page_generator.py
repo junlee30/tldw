@@ -67,21 +67,25 @@ class TestGeneratePage:
         )
         analysis = VideoAnalysisResult(
             title_summary="A great test video",
-            overall_summary="This video covers testing basics and best practices.",
+            prologue="This is where our story begins. The stage is set for something remarkable.",
+            epilogue="And that's how it all came together in the end.",
+            language="en",
             segments=[
                 VideoSegment(
                     timestamp=10.0,
                     timestamp_display="0:10",
                     headline="Introduction",
-                    summary="The host introduces the topic.",
+                    narration="The host introduces the topic with flair. The audience leans in.",
                     visual_description="Title card.",
+                    transition="",
                 ),
                 VideoSegment(
                     timestamp=120.0,
                     timestamp_display="2:00",
                     headline="Main Point",
-                    summary="The key argument is presented.",
+                    narration="The key argument is presented with conviction. Evidence mounts.",
                     visual_description="Presenter at whiteboard.",
+                    transition="But then...",
                 ),
             ],
             thumbnail_timestamp=10.0,
@@ -111,7 +115,7 @@ class TestGeneratePage:
         assert 'og:image' in html
         assert 'twitter:card' in html
 
-    def test_contains_cards(self, tmp_path):
+    def test_contains_scenes(self, tmp_path):
         metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
 
         html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
@@ -120,3 +124,30 @@ class TestGeneratePage:
         assert "Introduction" in html
         assert "Main Point" in html
         assert "card-00.webp" in html
+
+    def test_contains_prologue_and_epilogue(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+
+        html = html_path.read_text(encoding="utf-8")
+        assert "Prologue" in html
+        assert "story begins" in html
+        assert "Epilogue" in html
+        assert "came together" in html
+
+    def test_contains_transition(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+
+        html = html_path.read_text(encoding="utf-8")
+        assert "But then..." in html
+
+    def test_language_attribute(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+
+        html = html_path.read_text(encoding="utf-8")
+        assert 'lang="en"' in html

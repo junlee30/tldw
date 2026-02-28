@@ -81,12 +81,12 @@ class TestExtractBestFrame:
 
         mock_extract.side_effect = create_file
 
-        # Return different sharpness scores — third one is best
-        mock_sharpness.side_effect = [10.0, 20.0, 50.0, 30.0, 15.0]
+        # FRAME_CANDIDATES is now 2, so only 2 sharpness scores
+        mock_sharpness.side_effect = [10.0, 50.0]
 
         result = _extract_best_frame(
             tmp_path / "video.mp4", 30.0, tmp_path
         )
 
         assert result is not None
-        assert mock_sharpness.call_count == 5
+        assert mock_sharpness.call_count == 2

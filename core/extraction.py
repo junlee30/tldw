@@ -4,10 +4,11 @@ import logging
 import shutil
 import subprocess
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
 from config import (
     CARD_WIDTH,
@@ -83,7 +84,7 @@ def _extract_best_frame(
 ) -> Path | None:
     """Extract multiple frames around timestamp and return the sharpest."""
     candidates = []
-    step = (2 * FRAME_SEARCH_WINDOW) / (FRAME_CANDIDATES - 1)
+    step = (2 * FRAME_SEARCH_WINDOW) / max(FRAME_CANDIDATES - 1, 1)
 
     for i in range(FRAME_CANDIDATES):
         t = max(0, timestamp - FRAME_SEARCH_WINDOW + i * step)
@@ -112,6 +113,27 @@ def _resize_frame(path: Path, width: int, height: int) -> None:
     img.save(path)
 
 
+def _extract_frame_worker(
+    video_path: Path,
+    index: int,
+    timestamp: float,
+    frames_dir: Path,
+) -> tuple[int, Path | None]:
+    """Worker function for parallel frame extraction."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        logger.info(f"Extracting frame {index + 1} at {timestamp}s")
+        best = _extract_best_frame(video_path, timestamp, temp_path)
+        if best is not None:
+            dest = frames_dir / f"frame-{index:02d}.jpg"
+            shutil.copy2(best, dest)
+            _resize_frame(dest, CARD_WIDTH, CARD_HEIGHT)
+            return (index, dest)
+        else:
+            logger.warning(f"Could not extract frame at {timestamp}s, skipping")
+            return (index, None)
+
+
 def extract_frames(
     video_path: Path,
     timestamps: list[float],
@@ -120,38 +142,36 @@ def extract_frames(
 ) -> tuple[list[Path], Path | None]:
     """Extract and optimize frames for all timestamps plus thumbnail.
 
+    Uses parallel extraction with ThreadPoolExecutor for speed.
+
     Returns:
         Tuple of (list of card frame paths, thumbnail frame path).
-        Missing frames are represented as None-valued entries replaced
-        by skipping them in the output list.
     """
     _check_ffmpeg()
 
     frames_dir = output_dir / "frames"
     frames_dir.mkdir(exist_ok=True)
 
+    # Extract card frames in parallel
+    card_frames: list[Path] = []
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [
+            executor.submit(
+                _extract_frame_worker, video_path, i, ts, frames_dir
+            )
+            for i, ts in enumerate(timestamps)
+        ]
+        results = [f.result() for f in futures]
+
+    # Collect results in order, skipping failures
+    for _index, path in sorted(results, key=lambda x: x[0]):
+        if path is not None:
+            card_frames.append(path)
+
+    # Extract thumbnail frame (single, not parallelized)
+    thumbnail_path = None
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
-        card_frames: list[Path] = []
-
-        # Extract card frames
-        for i, ts in enumerate(timestamps):
-            logger.info(f"Extracting frame {i + 1}/{len(timestamps)} at {ts}s")
-            best = _extract_best_frame(video_path, ts, temp_path)
-            if best is not None:
-                dest = frames_dir / f"frame-{i:02d}.jpg"
-                shutil.copy2(best, dest)
-                _resize_frame(dest, CARD_WIDTH, CARD_HEIGHT)
-                card_frames.append(dest)
-            else:
-                logger.warning(f"Could not extract frame at {ts}s, skipping")
-
-            # Clean temp files for next iteration
-            for f in temp_path.iterdir():
-                f.unlink()
-
-        # Extract thumbnail frame
-        thumbnail_path = None
         logger.info(f"Extracting thumbnail frame at {thumbnail_timestamp}s")
         best = _extract_best_frame(video_path, thumbnail_timestamp, temp_path)
         if best is not None:

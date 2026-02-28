@@ -85,7 +85,7 @@ def run_pipeline(youtube_url: str) -> PipelineResult:
 
         # Step 5: Compose cards
         logger.info("Step 4/6: Composing card images...")
-        card_paths = compose_all_cards(card_frames, matched_segments, output_dir)
+        card_paths = compose_all_cards(card_frames, output_dir)
 
         # Step 6: Generate OG image
         logger.info("Step 5/6: Generating social preview image...")

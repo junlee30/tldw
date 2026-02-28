@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ language }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <!-- OG Tags -->
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ title_summary }}">
-    <meta property="og:description" content="{{ overall_summary }}">
+    <meta property="og:description" content="{{ prologue }}">
     <meta property="og:image" content="{{ og_image }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -17,8 +17,13 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ title_summary }}">
-    <meta name="twitter:description" content="{{ overall_summary }}">
+    <meta name="twitter:description" content="{{ prologue }}">
     <meta name="twitter:image" content="{{ og_image }}">
+
+    <!-- Google Fonts: Inter + CJK support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after {
@@ -30,7 +35,7 @@
         body {
             background: #0a0a0a;
             color: #e8e8e8;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', 'Noto Sans KR', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
         }
@@ -84,36 +89,6 @@
             gap: 6px;
         }
 
-        .summary-block {
-            background: #111;
-            border: 1px solid #1e1e1e;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 8px;
-        }
-
-        .summary-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .summary-headline {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-
-        .summary-text {
-            font-size: 15px;
-            color: #aaa;
-            line-height: 1.7;
-        }
-
         .watch-btn {
             display: inline-flex;
             align-items: center;
@@ -139,91 +114,143 @@
             fill: currentColor;
         }
 
-        /* Cards */
-        .cards-section {
-            padding: 40px 0;
+        /* Prologue & Epilogue */
+        .prologue, .epilogue {
+            background: #111;
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin-bottom: 8px;
         }
 
-        .cards-section-title {
+        .prologue {
+            margin-bottom: 40px;
+        }
+
+        .epilogue {
+            margin-top: 16px;
+            margin-bottom: 40px;
+        }
+
+        .block-label {
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: #666;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
 
-        .card {
-            margin-bottom: 24px;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #111;
-            border: 1px solid #1e1e1e;
+        .prologue-headline {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .prologue-text, .epilogue-text {
+            font-size: 16px;
+            color: #bbb;
+            line-height: 1.8;
+        }
+
+        /* Story Scenes */
+        .story-section {
+            padding: 8px 0 40px;
+        }
+
+        .story-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .scene {
+            margin-bottom: 48px;
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        .card.visible {
+        .scene.visible {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .card-image-link {
-            display: block;
+        .scene-transition {
+            font-size: 15px;
+            font-style: italic;
+            color: #888;
+            padding: 0 0 16px;
+            text-align: center;
+        }
+
+        .scene-frame {
             position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 0;
         }
 
-        .card-image-link::after {
-            content: '▶ Watch this moment';
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.75);
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 12px;
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.25s;
-        }
-
-        .card-image-link:hover::after {
-            opacity: 1;
-        }
-
-        .card img {
+        .scene-frame img {
             width: 100%;
             height: auto;
             display: block;
         }
 
-        .card-body {
-            padding: 20px 24px;
+        .scene-frame-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 28px 24px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
         }
 
-        .card-headline {
-            font-size: 17px;
-            font-weight: 700;
+        .scene-headline {
+            font-size: 22px;
+            font-weight: 900;
             color: #fff;
-            margin-bottom: 8px;
+            line-height: 1.3;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
         }
 
-        .card-summary {
-            font-size: 14px;
-            color: #999;
-            line-height: 1.6;
+        .scene-body {
+            padding: 20px 4px 0;
         }
 
-        .card-timestamp {
-            display: inline-block;
-            margin-top: 12px;
+        .scene-narration {
+            font-size: 16px;
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .scene-timestamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 12px;
-            color: #666;
+            color: #888;
             background: #1a1a1a;
-            padding: 4px 10px;
+            padding: 5px 14px;
             border-radius: 100px;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .scene-timestamp:hover {
+            background: #2a2a2a;
+            color: #fff;
+        }
+
+        .scene-timestamp svg {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
         }
 
         /* Footer */
@@ -273,12 +300,20 @@
                 font-size: 22px;
             }
 
-            .summary-block {
-                padding: 18px;
+            .prologue, .epilogue {
+                padding: 20px;
             }
 
-            .card-body {
-                padding: 16px 18px;
+            .scene-headline {
+                font-size: 18px;
+            }
+
+            .scene-narration {
+                font-size: 15px;
+            }
+
+            .scene-frame-overlay {
+                padding: 32px 20px 18px;
             }
 
             .header {
@@ -303,10 +338,11 @@
             {% if upload_date %}<span>{{ upload_date }}</span>{% endif %}
         </div>
 
-        <div class="summary-block">
-            <div class="summary-label">Summary</div>
-            <div class="summary-headline">{{ title_summary }}</div>
-            <div class="summary-text">{{ overall_summary }}</div>
+        <!-- Prologue -->
+        <div class="prologue">
+            <div class="block-label">Prologue</div>
+            <div class="prologue-headline">{{ title_summary }}</div>
+            <div class="prologue-text">{{ prologue }}</div>
         </div>
 
         <a href="{{ video_url }}" target="_blank" rel="noopener" class="watch-btn">
@@ -315,22 +351,40 @@
         </a>
     </header>
 
-    <!-- Cards -->
-    <section class="cards-section">
-        <div class="cards-section-title">Key Moments ({{ cards|length }})</div>
+    <!-- Story Scenes -->
+    <section class="story-section">
+        <div class="story-section-title">The Story ({{ scenes|length }} scenes)</div>
 
-        {% for card in cards %}
-        <article class="card">
-            <a href="{{ card.youtube_url }}" target="_blank" rel="noopener" class="card-image-link">
-                <img src="{{ card.image_path }}" alt="{{ card.headline }}" loading="lazy" width="1280" height="720">
-            </a>
-            <div class="card-body">
-                <div class="card-headline">{{ card.headline }}</div>
-                <div class="card-summary">{{ card.summary }}</div>
-                <span class="card-timestamp">{{ card.timestamp_display }}</span>
+        {% for scene in scenes %}
+        <article class="scene">
+            {% if scene.transition %}
+            <div class="scene-transition">{{ scene.transition }}</div>
+            {% endif %}
+
+            <div class="scene-frame">
+                <img src="{{ scene.image_path }}" alt="{{ scene.headline }}" loading="lazy" width="1280" height="720">
+                <div class="scene-frame-overlay">
+                    <div class="scene-headline">{{ scene.headline }}</div>
+                </div>
+            </div>
+
+            <div class="scene-body">
+                <p class="scene-narration">{{ scene.narration }}</p>
+                <a href="{{ scene.youtube_url }}" target="_blank" rel="noopener" class="scene-timestamp">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    {{ scene.timestamp_display }}
+                </a>
             </div>
         </article>
         {% endfor %}
+
+        {% if epilogue %}
+        <!-- Epilogue -->
+        <div class="epilogue">
+            <div class="block-label">Epilogue</div>
+            <div class="epilogue-text">{{ epilogue }}</div>
+        </div>
+        {% endif %}
     </section>
 
     <!-- Footer -->
@@ -357,7 +411,7 @@
         });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.card').forEach(card => observer.observe(card));
+    document.querySelectorAll('.scene').forEach(scene => observer.observe(scene));
 </script>
 
 </body>

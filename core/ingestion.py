@@ -59,8 +59,8 @@ def extract_video_id(url: str) -> str:
             if "v" in qs:
                 return qs["v"][0]
 
-        # youtube.com/shorts/VIDEO_ID or youtube.com/embed/VIDEO_ID
-        match = re.match(r"^/(shorts|embed)/([a-zA-Z0-9_-]+)", parsed.path)
+        # youtube.com/shorts/VIDEO_ID, youtube.com/embed/VIDEO_ID, or youtube.com/live/VIDEO_ID
+        match = re.match(r"^/(shorts|embed|live)/([a-zA-Z0-9_-]+)", parsed.path)
         if match:
             return match.group(2)
 
