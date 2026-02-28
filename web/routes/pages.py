@@ -84,22 +84,19 @@ async def serve_summary(video_id: str):
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Summary not found")
     html = html_path.read_text(encoding="utf-8")
-    # Inject back button for older summaries that don't have one
-    if "back-btn" not in html:
-        back_btn_style = (
-            "<style>"
-            ".back-btn{display:inline-flex;align-items:center;gap:6px;color:#888;"
-            "text-decoration:none;font-size:14px;font-weight:600;padding:8px 0;"
-            "transition:color .2s}.back-btn:hover{color:#fff}.back-btn svg{width:16px;height:16px;fill:currentColor}"
-            "</style>"
+    # Patch older summaries: make brand badge a home link
+    if '<div class="brand">' in html:
+        html = html.replace(
+            '<div class="brand">TL;DW</div>',
+            '<a href="/" class="brand">TL;DW</a>',
+            1,
         )
-        back_btn_html = (
-            '<a href="/" class="back-btn" onclick="if(history.length>1){history.back();return false}">'
-            '<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>'
-            'Back</a>'
+        # Add hover style for the brand link
+        html = html.replace(
+            "margin-bottom: 24px;\n        }",
+            "margin-bottom: 24px;\n            text-decoration: none;\n            transition: background 0.2s;\n        }\n\n        .brand:hover {\n            background: #e0e0e0;\n        }",
+            1,
         )
-        html = html.replace("</head>", back_btn_style + "</head>", 1)
-        html = html.replace('<div class="brand">', back_btn_html + '<div class="brand">', 1)
     return HTMLResponse(html)
 
 
