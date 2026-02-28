@@ -22,6 +22,7 @@ DATABASE_PATH = os.getenv("DATABASE_PATH", str(OUTPUT_DIR / "tldw.db"))
 
 FONT_BOLD = FONTS_DIR / "Inter-Bold.ttf"
 FONT_REGULAR = FONTS_DIR / "Inter-Regular.ttf"
+FONT_CJK = FONTS_DIR / "NotoSansKR.ttf"
 WATERMARK_PATH = OVERLAYS_DIR / "tldw_watermark.png"
 FAVICON_PATH = ASSETS_DIR / "favicon.ico"
 

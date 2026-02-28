@@ -1,6 +1,7 @@
 """OG thumbnail generation for social media link previews."""
 
 import logging
+import unicodedata
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
@@ -9,22 +10,98 @@ from config import (
     OG_WIDTH,
     OG_HEIGHT,
     FONT_BOLD,
-    FONT_REGULAR,
+    FONT_CJK,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def _load_og_fonts() -> tuple[ImageFont.FreeTypeFont, ...]:
-    """Load fonts for OG image."""
+def _has_cjk(text: str) -> bool:
+    """Check if text contains CJK characters."""
+    for ch in text:
+        cat = unicodedata.category(ch)
+        # Lo = Letter, other (includes CJK ideographs and Hangul syllables)
+        if cat == "Lo":
+            return True
+    return False
+
+
+def _load_og_fonts(
+    use_cjk: bool,
+) -> tuple[ImageFont.FreeTypeFont, ImageFont.FreeTypeFont]:
+    """Load fonts for OG image, using CJK font when needed."""
     try:
-        title_font = ImageFont.truetype(str(FONT_BOLD), 36)
         brand_font = ImageFont.truetype(str(FONT_BOLD), 28)
     except OSError:
-        logger.warning("Inter fonts not found, using default font")
-        title_font = ImageFont.load_default()
+        logger.warning("Inter Bold font not found, using default")
         brand_font = ImageFont.load_default()
+
+    if use_cjk:
+        try:
+            title_font = ImageFont.truetype(str(FONT_CJK), 36)
+        except OSError:
+            logger.warning("Noto Sans KR font not found, falling back to Inter")
+            try:
+                title_font = ImageFont.truetype(str(FONT_BOLD), 36)
+            except OSError:
+                title_font = ImageFont.load_default()
+    else:
+        try:
+            title_font = ImageFont.truetype(str(FONT_BOLD), 36)
+        except OSError:
+            title_font = ImageFont.load_default()
+
     return title_font, brand_font
+
+
+def _wrap_text(
+    text: str,
+    font: ImageFont.FreeTypeFont,
+    max_width: int,
+    draw: ImageDraw.ImageDraw,
+) -> list[str]:
+    """Word-wrap text, handling both space-separated and CJK text."""
+    if not text:
+        return []
+
+    has_cjk = _has_cjk(text)
+
+    if has_cjk:
+        # Character-level wrapping for CJK text
+        lines = []
+        current_line = ""
+        for ch in text:
+            test = current_line + ch
+            bbox = draw.textbbox((0, 0), test, font=font)
+            if (bbox[2] - bbox[0]) > max_width and current_line:
+                lines.append(current_line)
+                current_line = ch
+            else:
+                current_line = test
+        if current_line:
+            lines.append(current_line)
+    else:
+        # Space-based wrapping for Latin text
+        words = text.split()
+        lines = []
+        current_line = words[0] if words else ""
+        for word in words[1:]:
+            test = f"{current_line} {word}"
+            bbox = draw.textbbox((0, 0), test, font=font)
+            if (bbox[2] - bbox[0]) <= max_width:
+                current_line = test
+            else:
+                lines.append(current_line)
+                current_line = word
+        if current_line:
+            lines.append(current_line)
+
+    # Limit to 3 lines
+    if len(lines) > 3:
+        lines = lines[:3]
+        lines[-1] = lines[-1][:50].rstrip() + "..."
+
+    return lines
 
 
 def _crop_to_aspect_ratio(
@@ -53,7 +130,8 @@ def _draw_branding_overlay(
     image: Image.Image, video_title: str
 ) -> Image.Image:
     """Draw TL;DW branding and title overlay on the image."""
-    title_font, brand_font = _load_og_fonts()
+    use_cjk = _has_cjk(video_title)
+    title_font, brand_font = _load_og_fonts(use_cjk)
 
     # Darken the image
     enhancer = ImageEnhance.Brightness(image)
@@ -94,26 +172,7 @@ def _draw_branding_overlay(
     # Title at bottom
     margin = 40
     max_title_width = img.width - margin * 2
-
-    # Word wrap title
-    words = video_title.split()
-    lines = []
-    current_line = words[0] if words else ""
-    for word in words[1:]:
-        test = f"{current_line} {word}"
-        tbbox = draw.textbbox((0, 0), test, font=title_font)
-        if (tbbox[2] - tbbox[0]) <= max_title_width:
-            current_line = test
-        else:
-            lines.append(current_line)
-            current_line = word
-    if current_line:
-        lines.append(current_line)
-
-    # Limit to 3 lines
-    if len(lines) > 3:
-        lines = lines[:3]
-        lines[-1] = lines[-1][:50].rstrip() + "..."
+    lines = _wrap_text(video_title, title_font, max_title_width, draw)
 
     # Draw title lines from bottom up
     line_height = 44
