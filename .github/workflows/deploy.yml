@@ -29,7 +29,7 @@ jobs:
               --restart unless-stopped \
               --env-file /opt/tldw/.env \
               -v /opt/tldw/output:/app/output \
-              -v /opt/tldw/cookies.txt:/app/cookies.txt:ro \
+              -v /opt/tldw/cookies.txt:/app/cookies.txt \
               -p 8080:8080 \
               tldw
             docker image prune -f
