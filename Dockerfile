@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-# Install ffmpeg
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && \
+# Install ffmpeg and Node.js (needed by yt-dlp for YouTube n-parameter challenge)
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
