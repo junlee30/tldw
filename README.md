@@ -82,13 +82,14 @@ uvicorn web.app:app --reload --port 8080
 
 Open `http://localhost:8080`, log in, paste a YouTube URL, and watch it process.
 
-### Deploy to Fly.io
+### Deploy
+
+Hosted on Oracle Cloud Free Tier at [tldwapp.com](https://tldwapp.com). Pushes to `master` auto-deploy via GitHub Actions.
 
 ```bash
-fly launch --no-deploy
-fly volumes create tldw_data --region nrt --size 1
-fly secrets set GEMINI_API_KEY=... TLDW_PASSWORD=... SECRET_KEY=...
-fly deploy
+# Or run locally with Docker
+docker build -t tldw .
+docker run -d --env-file .env -v ./output:/app/output -p 8080:8080 tldw
 ```
 
 ## Testing
@@ -133,7 +134,6 @@ tldw/
     overlays/              # TL;DW watermark
   tests/                   # unit tests
   Dockerfile              # Docker image for deployment
-  fly.toml                # Fly.io configuration
 ```
 
 ## Limitations
