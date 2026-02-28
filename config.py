@@ -15,6 +15,11 @@ OVERLAYS_DIR = ASSETS_DIR / "overlays"
 TEMPLATES_DIR = PROJECT_ROOT / "templates"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
+# --- Web app ---
+TLDW_PASSWORD = os.getenv("TLDW_PASSWORD", "")
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
+DATABASE_PATH = os.getenv("DATABASE_PATH", str(OUTPUT_DIR / "tldw.db"))
+
 FONT_BOLD = FONTS_DIR / "Inter-Bold.ttf"
 FONT_REGULAR = FONTS_DIR / "Inter-Regular.ttf"
 WATERMARK_PATH = OVERLAYS_DIR / "tldw_watermark.png"

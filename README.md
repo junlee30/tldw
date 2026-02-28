@@ -47,6 +47,8 @@ python generate_assets.py
 
 ## Usage
 
+### CLI
+
 ```bash
 python main.py "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
@@ -63,6 +65,30 @@ output/<video_id>/
   analysis.json       # cached Gemini analysis
   cards/              # card images (1280x720 WebP)
   frames/             # extracted raw frames
+```
+
+### Web App
+
+A mobile-friendly web UI for submitting URLs, tracking progress, and browsing summaries.
+
+```bash
+# Add to .env
+TLDW_PASSWORD=your-password
+SECRET_KEY=some-random-secret
+
+# Start the server
+uvicorn web.app:app --reload --port 8080
+```
+
+Open `http://localhost:8080`, log in, paste a YouTube URL, and watch it process.
+
+### Deploy to Fly.io
+
+```bash
+fly launch --no-deploy
+fly volumes create tldw_data --region nrt --size 1
+fly secrets set GEMINI_API_KEY=... TLDW_PASSWORD=... SECRET_KEY=...
+fly deploy
 ```
 
 ## Testing
@@ -89,12 +115,25 @@ tldw/
     pipeline.py            # orchestration
   prompts/
     video_analysis.py      # Pydantic models + Gemini prompt
+  web/
+    app.py                 # FastAPI app
+    auth.py                # password auth + session middleware
+    db.py                  # SQLite job tracking
+    jobs.py                # background worker + progress handler
+    routes/
+      api.py               # JSON API endpoints
+      pages.py             # HTML page routes
+    static/
+      style.css            # mobile-first dark theme
   templates/
-    summary_page.html      # Jinja2 template
+    summary_page.html      # Jinja2 template (CLI output)
+    web/                   # web app templates
   assets/
     fonts/                 # Inter Bold + Regular TTFs
     overlays/              # TL;DW watermark
   tests/                   # unit tests
+  Dockerfile              # Docker image for deployment
+  fly.toml                # Fly.io configuration
 ```
 
 ## Limitations

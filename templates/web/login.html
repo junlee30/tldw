@@ -1,0 +1,24 @@
+{% extends "web/base.html" %}
+{% block title %}Login — TL;DW{% endblock %}
+{% block body %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="brand">TL;DW</div>
+        <p class="login-subtitle">Enter password to continue</p>
+        {% if request.query_params.get('error') %}
+        <div class="error-msg">Wrong password. Try again.</div>
+        {% endif %}
+        <form method="POST" action="/auth/login">
+            <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                autocomplete="current-password"
+                autofocus
+                required
+            >
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

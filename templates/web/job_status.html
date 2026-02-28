@@ -1,0 +1,64 @@
+{% extends "web/base.html" %}
+{% block title %}Processing — TL;DW{% endblock %}
+{% block body %}
+<div class="container">
+    <header class="app-header">
+        <a href="/" class="app-header-left">
+            <div class="brand">TL;DW</div>
+        </a>
+    </header>
+
+    <div class="status-page">
+        <div class="status-card">
+            <div id="status-icon" class="status-icon">
+                {% if job.status == 'failed' %}
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="#ff4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                {% else %}
+                <div class="spinner"></div>
+                {% endif %}
+            </div>
+            <div class="status-label" id="status-label">
+                {% if job.status == 'failed' %}
+                Failed
+                {% elif job.status == 'completed' %}
+                Done!
+                {% else %}
+                Processing...
+                {% endif %}
+            </div>
+            <div class="status-step" id="status-step">{{ job.step or '' }}</div>
+            {% if job.status == 'failed' %}
+            <div class="error-msg">{{ job.error }}</div>
+            <a href="/" class="back-link">Back to home</a>
+            {% endif %}
+        </div>
+        <div class="status-url">{{ job.youtube_url }}</div>
+    </div>
+</div>
+
+{% if job.status not in ('completed', 'failed') %}
+<script>
+const jobId = "{{ job.id }}";
+async function poll() {
+    try {
+        const res = await fetch('/api/jobs/' + jobId);
+        const job = await res.json();
+        document.getElementById('status-step').textContent = job.step || '';
+        if (job.status === 'completed' && job.video_id) {
+            document.getElementById('status-label').textContent = 'Done! Redirecting...';
+            window.location.href = '/s/' + job.video_id + '/';
+        } else if (job.status === 'failed') {
+            document.getElementById('status-label').textContent = 'Failed';
+            document.getElementById('status-icon').innerHTML = '<svg viewBox="0 0 24 24" width="48" height="48" fill="#ff4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+            document.getElementById('status-step').textContent = job.error || 'An error occurred';
+        } else {
+            setTimeout(poll, 3000);
+        }
+    } catch (e) {
+        setTimeout(poll, 5000);
+    }
+}
+poll();
+</script>
+{% endif %}
+{% endblock %}

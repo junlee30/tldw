@@ -1,0 +1,104 @@
+{% extends "web/base.html" %}
+{% block title %}TL;DW{% endblock %}
+{% block body %}
+<div class="container">
+    <header class="app-header">
+        <div class="app-header-left">
+            <div class="brand">TL;DW</div>
+        </div>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </header>
+
+    <!-- Submit Form -->
+    <section class="submit-section">
+        <form id="submit-form" class="submit-form">
+            <input
+                type="url"
+                id="youtube-url"
+                placeholder="Paste a YouTube URL..."
+                autocomplete="off"
+                required
+            >
+            <button type="submit" id="submit-btn">Summarize</button>
+        </form>
+        <div id="submit-error" class="error-msg" style="display:none"></div>
+    </section>
+
+    <!-- Active Jobs -->
+    {% if jobs %}
+    <section class="active-jobs">
+        <h2 class="section-title">In Progress</h2>
+        {% for job in jobs %}
+        <a href="/jobs/{{ job.id }}" class="job-card">
+            <div class="job-card-info">
+                <div class="job-card-url">{{ job.youtube_url }}</div>
+                <div class="job-card-step">{{ job.step or job.status }}</div>
+            </div>
+            <div class="job-status-badge status-{{ job.status }}">{{ job.status }}</div>
+        </a>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- Gallery -->
+    {% if summaries %}
+    <section class="gallery">
+        <h2 class="section-title">Summaries</h2>
+        <div class="gallery-grid">
+            {% for s in summaries %}
+            <a href="/s/{{ s.video_id }}/" class="gallery-card">
+                {% if s.thumbnail %}
+                <div class="gallery-thumb">
+                    <img src="{{ s.thumbnail }}" alt="{{ s.video_title }}" loading="lazy">
+                </div>
+                {% endif %}
+                <div class="gallery-info">
+                    <div class="gallery-title">{{ s.video_title or s.youtube_url }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not summaries and not jobs %}
+    <div class="empty-state">
+        <p>No summaries yet. Paste a YouTube URL above to get started.</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('submit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = document.getElementById('youtube-url').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const errEl = document.getElementById('submit-error');
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    try {
+        const res = await fetch('/api/jobs', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({youtube_url: url}),
+        });
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.detail || 'Request failed');
+        }
+        const job = await res.json();
+        if (job.status === 'completed' && job.video_id) {
+            window.location.href = '/s/' + job.video_id + '/';
+        } else {
+            window.location.href = '/jobs/' + job.id;
+        }
+    } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Summarize';
+    }
+});
+</script>
+{% endblock %}
