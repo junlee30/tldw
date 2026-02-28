@@ -11,6 +11,7 @@ import yt_dlp
 from config import (
     MAX_VIDEO_DURATION,
     MIN_VIDEO_DURATION,
+    YTDLP_COOKIES_FILE,
     YTDLP_FORMAT,
     YTDLP_RETRIES,
 )
@@ -74,6 +75,8 @@ def fetch_metadata(url: str) -> VideoMetadata:
         "quiet": True,
         "no_warnings": True,
     }
+    if YTDLP_COOKIES_FILE:
+        opts["cookiefile"] = YTDLP_COOKIES_FILE
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -116,6 +119,8 @@ def download_video(url: str, output_dir: Path) -> Path:
         "quiet": True,
         "no_warnings": True,
     }
+    if YTDLP_COOKIES_FILE:
+        opts["cookiefile"] = YTDLP_COOKIES_FILE
 
     logger.info("Downloading video...")
     try:
