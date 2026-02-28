@@ -36,32 +36,23 @@ CARD_HEIGHT = 720
 OG_WIDTH = 1200
 OG_HEIGHT = 630
 
-# --- Font sizes ---
-HEADLINE_FONT_SIZE = 42
-SUMMARY_FONT_SIZE = 22
-BADGE_FONT_SIZE = 20
-COUNTER_FONT_SIZE = 18
-
-# --- Composition ---
-DARKEN_FACTOR = 0.55
-GRADIENT_HEIGHT_RATIO = 0.45
-
 # --- Frame extraction ---
 FRAME_SEARCH_WINDOW = 1.0  # seconds +/- around target timestamp
-FRAME_CANDIDATES = 5  # number of candidate frames to evaluate
+FRAME_CANDIDATES = 2  # number of candidate frames to evaluate
 
 # --- Gemini File API ---
 FILE_UPLOAD_POLL_INTERVAL = 5  # seconds
 FILE_UPLOAD_TIMEOUT = 300  # 5 minutes
 
 # --- yt-dlp ---
-YTDLP_FORMAT = "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best"
+YTDLP_FORMAT = "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best"
 YTDLP_RETRIES = 3
 
 # --- Retry ---
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
 
-# --- Segments ---
-MIN_SEGMENTS = 5
-MAX_SEGMENTS = 8
+# --- Scene scaling ---
+SCENES_PER_MINUTE = 0.5  # 1 scene per 2 minutes of video
+MIN_SCENES = 4           # floor for very short videos
+MAX_SCENES = 20          # ceiling for very long videos

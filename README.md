@@ -3,14 +3,14 @@
 **Too Long; Didn't Watch** — Convert YouTube videos into shareable visual story summaries.
 
 Given a YouTube URL, TL;DW generates a self-contained HTML page with:
-- **5-8 key moment cards** — frame capture + headline + summary, each linking to that timestamp on YouTube
+- **Scene cards that scale with video length** (4-20) — frame capture + headline + summary, each linking to that timestamp on YouTube
 - **OG thumbnail** (1200x630) for rich link previews on Telegram, X, Slack, etc.
 - **Dark-themed responsive page** with scroll animations and proper meta tags
 
 ## How It Works
 
 1. **Download** — yt-dlp fetches the video at 720p
-2. **Analyze** — Gemini 2.5 Flash watches the video and identifies key moments via structured output
+2. **Analyze** — Gemini 2.5 Flash watches the video and identifies scenes (count scales with duration) via structured output
 3. **Extract** — ffmpeg pulls frames at each timestamp, sharpness scoring picks the best candidate
 4. **Compose** — Pillow renders card images with darkened frames, gradient overlays, headlines, and timestamps
 5. **Generate** — Jinja2 produces a self-contained HTML page with inlined CSS
@@ -71,7 +71,7 @@ output/<video_id>/
 python -m pytest tests/ -v
 ```
 
-47 unit tests covering URL parsing, metadata validation, analysis caching, sharpness computation, text wrapping, card composition, duration formatting, and HTML generation.
+60 unit tests covering URL parsing, metadata validation, analysis caching, scene count scaling, sharpness computation, text wrapping, card composition, duration formatting, and HTML generation.
 
 ## Project Structure
 
