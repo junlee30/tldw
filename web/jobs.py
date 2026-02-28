@@ -18,7 +18,7 @@ class JobProgressHandler(logging.Handler):
         self.job_id = job_id
 
     def emit(self, record: logging.LogRecord):
-        msg = self.getMessage() if hasattr(self, "getMessage") else record.getMessage()
+        msg = record.getMessage()
         if msg.startswith("Step "):
             try:
                 update_job(self.job_id, step=msg)
@@ -59,7 +59,8 @@ def _run_job(job_id: str, youtube_url: str) -> None:
             thumbnail_url=result.metadata.thumbnail_url,
             completed_at=datetime.now(timezone.utc).isoformat(),
         )
-    except (PipelineError, Exception) as e:
+    except Exception as e:
+        logging.getLogger(__name__).exception(f"Job {job_id} failed: {e}")
         update_job(
             job_id,
             status="failed",
