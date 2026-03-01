@@ -58,7 +58,7 @@ YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "")  # path to Netscape-for
 
 # --- Telegram notifications ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHANNEL_ID", "")
 
 # --- Retry ---
 MAX_RETRIES = 3
