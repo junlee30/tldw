@@ -37,11 +37,26 @@ def _create_client() -> genai.Client:
     return genai.Client(api_key=GEMINI_API_KEY)
 
 
+MIME_TYPES = {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".m4a": "audio/mp4",
+    ".aac": "audio/aac",
+    ".ogg": "audio/ogg",
+    ".mp3": "audio/mpeg",
+}
+
+
 def _upload_video(client: genai.Client, video_path: Path):
-    """Upload video via Gemini File API and wait until ACTIVE."""
+    """Upload video/audio via Gemini File API and wait until ACTIVE."""
     logger.info(f"Uploading {video_path.name} to Gemini File API...")
 
-    uploaded = client.files.upload(file=video_path)
+    mime_type = MIME_TYPES.get(video_path.suffix.lower())
+    upload_kwargs = {"file": video_path}
+    if mime_type:
+        upload_kwargs["config"] = {"mimeType": mime_type}
+
+    uploaded = client.files.upload(**upload_kwargs)
     logger.info(f"Upload started: {uploaded.name}")
 
     start = time.time()
