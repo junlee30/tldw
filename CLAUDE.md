@@ -28,6 +28,7 @@ web/
   auth.py              # HMAC-SHA256 signed cookie sessions (30-day TTL)
   db.py                # SQLite job tracking
   jobs.py              # Background thread pool (max 1 concurrent), progress via log handler
+  telegram.py          # Telegram notifications on job completion/failure
   routes/
     api.py             # POST /api/jobs, GET /api/jobs, GET /api/jobs/{id}
     pages.py           # /, /login, /jobs/{id}, /s/{video_id}/ (serves generated summaries)
@@ -59,6 +60,8 @@ TLDW_PASSWORD=...                           # Web app login password
 SECRET_KEY=...                              # Session cookie signing key
 YTDLP_COOKIES_FILE=cookies.txt              # Netscape-format YouTube cookies
 DATABASE_PATH=/path/to/tldw.db              # SQLite (defaults to output/tldw.db)
+TELEGRAM_BOT_TOKEN=...                      # Optional: Telegram bot token from @BotFather
+TELEGRAM_CHANNEL_ID=@channel_name           # Optional: Telegram channel for job notifications
 ```
 
 ## yt-dlp YouTube Auth
@@ -100,6 +103,7 @@ uvicorn web.app:app --host 0.0.0.0 --port 8080
 
 ## Key Config Values (config.py)
 
+- Telegram: optional notifications to a channel on job success/failure
 - Video: 10s min, 3600s (1hr) max duration
 - Download: 480p max quality
 - Cards: 1280x720, WebP quality 90
