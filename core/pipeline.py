@@ -65,6 +65,7 @@ def run_pipeline(youtube_url: str) -> PipelineResult:
     metadata = result.metadata
     video_path = result.video_path
     save_metadata(metadata, output_dir)
+    logger.info(f"video_duration:{metadata.duration}")
 
     try:
         # Step 3: Analyze

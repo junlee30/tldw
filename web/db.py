@@ -29,6 +29,11 @@ def _connect() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute(_SCHEMA)
+    # Migrations for columns added after initial schema
+    try:
+        conn.execute("ALTER TABLE jobs ADD COLUMN video_duration INTEGER DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
     conn.commit()
     return conn
 

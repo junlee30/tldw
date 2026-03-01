@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from core.ingestion import extract_video_id
 from web.db import create_job, get_job, list_jobs, find_job_by_video_id
-from web.jobs import enqueue_job
+from web.jobs import enqueue_job, estimate_total_seconds
 
 router = APIRouter(prefix="/api")
 
@@ -47,4 +47,7 @@ def get_job_status(job_id: str):
     job = get_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
-    return job
+    result = dict(job)
+    if result.get("video_duration", 0) > 0 and result["status"] == "processing":
+        result["estimated_seconds"] = estimate_total_seconds(result["video_duration"])
+    return result

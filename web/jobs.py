@@ -24,6 +24,21 @@ class JobProgressHandler(logging.Handler):
                 update_job(self.job_id, step=msg)
             except Exception:
                 pass
+        elif msg.startswith("video_duration:"):
+            try:
+                duration = int(msg.split(":", 1)[1])
+                update_job(self.job_id, video_duration=duration)
+            except (ValueError, Exception):
+                pass
+
+
+def estimate_total_seconds(video_duration: int) -> int:
+    """Estimate total processing time based on video duration.
+
+    Formula: ~2x video duration + 25s overhead for steps 3-6.
+    """
+    estimate = 2.0 * video_duration + 25
+    return max(int(estimate), 30)
 
 
 def _run_job(job_id: str, youtube_url: str) -> None:

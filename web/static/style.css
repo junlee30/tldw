@@ -457,6 +457,22 @@ body {
     margin-top: 8px;
 }
 
+.time-estimate {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 12px;
+}
+
+.elapsed-time {
+    color: #888;
+}
+
+.estimate-text {
+    color: #555;
+}
+
 /* Mobile */
 @media (max-width: 640px) {
     .submit-form {

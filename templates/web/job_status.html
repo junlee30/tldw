@@ -37,6 +37,10 @@
                 <div class="progress-step" data-step="6"></div>
             </div>
             <div class="progress-label" id="progress-label"></div>
+            <div class="time-estimate" id="time-estimate">
+                <span class="elapsed-time" id="elapsed-time"></span>
+                <span class="estimate-text" id="estimate-text"></span>
+            </div>
             {% endif %}
             {% if job.status == 'failed' %}
             <div class="error-msg">{{ job.error }}</div>
@@ -50,11 +54,47 @@
 {% if job.status not in ('completed', 'failed') %}
 <script>
 const jobId = "{{ job.id }}";
+const createdAt = new Date("{{ job.created_at }}");
+let estimatedSeconds = null;
+let timerInterval = null;
+
+function formatTime(totalSeconds) {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return mins + ':' + String(secs).padStart(2, '0');
+}
+
+function updateTimeDisplay() {
+    const now = new Date();
+    const elapsedSec = Math.floor((now - createdAt) / 1000);
+    const elapsedEl = document.getElementById('elapsed-time');
+    const estimateEl = document.getElementById('estimate-text');
+    if (elapsedEl) elapsedEl.textContent = 'Elapsed: ' + formatTime(elapsedSec);
+    if (estimateEl && estimatedSeconds) {
+        const remaining = estimatedSeconds - elapsedSec;
+        if (remaining > 0) {
+            estimateEl.textContent = '~' + formatTime(remaining) + ' remaining';
+        } else {
+            estimateEl.textContent = 'Almost done...';
+        }
+    }
+}
+
+function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// Start elapsed timer immediately
+timerInterval = setInterval(updateTimeDisplay, 1000);
+updateTimeDisplay();
+
 async function poll() {
     try {
         const res = await fetch('/api/jobs/' + jobId);
         const job = await res.json();
         document.getElementById('status-step').textContent = job.step || '';
+        // Capture estimate from API
+        if (job.estimated_seconds) estimatedSeconds = job.estimated_seconds;
         // Update progress steps
         const stepMatch = (job.step || '').match(/Step (\d+)\/(\d+)/);
         if (stepMatch) {
@@ -71,9 +111,11 @@ async function poll() {
             if (label) label.textContent = 'Step ' + current + ' of ' + total;
         }
         if (job.status === 'completed' && job.video_id) {
+            stopTimer();
             document.getElementById('status-label').textContent = 'Done! Redirecting...';
             window.location.href = '/s/' + job.video_id + '/';
         } else if (job.status === 'failed') {
+            stopTimer();
             document.getElementById('status-label').textContent = 'Failed';
             document.getElementById('status-icon').innerHTML = '<svg viewBox="0 0 24 24" width="48" height="48" fill="#ff4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
             document.getElementById('status-step').textContent = job.error || 'An error occurred';
