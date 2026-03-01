@@ -32,7 +32,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = "gemini-2.5-flash"
 
 # --- Video constraints ---
-MAX_VIDEO_DURATION = 3600  # 1 hour in seconds
+MAX_VIDEO_DURATION = 7200  # 2 hours in seconds
 MIN_VIDEO_DURATION = 10  # 10 seconds minimum
 
 # --- Card dimensions ---
@@ -49,7 +49,7 @@ FRAME_CANDIDATES = 2  # number of candidate frames to evaluate
 
 # --- Gemini File API ---
 FILE_UPLOAD_POLL_INTERVAL = 5  # seconds
-FILE_UPLOAD_TIMEOUT = 300  # 5 minutes
+FILE_UPLOAD_TIMEOUT = 600  # 10 minutes
 
 # --- yt-dlp ---
 YTDLP_FORMAT = "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best"
