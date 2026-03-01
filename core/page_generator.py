@@ -70,6 +70,15 @@ def _build_template_context(
             "total": len(card_paths),
         })
 
+    # Compute reading time estimate
+    word_count = len(analysis.prologue.split())
+    for seg in analysis.segments:
+        word_count += len(seg.narration.split())
+        word_count += len(seg.headline.split())
+    if analysis.epilogue:
+        word_count += len(analysis.epilogue.split())
+    reading_minutes = max(1, round(word_count / 200))
+
     return {
         "title": metadata.title,
         "channel": metadata.channel,
@@ -85,6 +94,7 @@ def _build_template_context(
         "video_url": f"https://www.youtube.com/watch?v={metadata.video_id}",
         "video_id": metadata.video_id,
         "thumbnail_url": metadata.thumbnail_url,
+        "reading_time": f"{reading_minutes} min read",
     }
 
 

@@ -399,6 +399,64 @@ body {
     color: #fff;
 }
 
+/* Submit button loading state */
+.submit-form button.loading {
+    color: transparent;
+    position: relative;
+    pointer-events: none;
+}
+
+.submit-form button.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Job progress steps */
+.progress-steps {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 24px;
+}
+
+.progress-step {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #222;
+    transition: background 0.3s;
+}
+
+.progress-step.completed {
+    background: #ff0033;
+}
+
+.progress-step.active {
+    background: #ff0033;
+    animation: pulse-step 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-step {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #555;
+    margin-top: 8px;
+}
+
 /* Mobile */
 @media (max-width: 640px) {
     .submit-form {
@@ -411,5 +469,13 @@ body {
 
     .gallery-grid {
         grid-template-columns: 1fr;
+    }
+
+    .gallery-title {
+        font-size: 16px;
+    }
+
+    .gallery-info {
+        padding: 16px;
     }
 }

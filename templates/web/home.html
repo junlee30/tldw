@@ -76,7 +76,7 @@ document.getElementById('submit-form').addEventListener('submit', async (e) => {
     const errEl = document.getElementById('submit-error');
     errEl.style.display = 'none';
     btn.disabled = true;
-    btn.textContent = 'Submitting...';
+    btn.classList.add('loading');
     try {
         const res = await fetch('/api/jobs', {
             method: 'POST',
@@ -97,7 +97,7 @@ document.getElementById('submit-form').addEventListener('submit', async (e) => {
         errEl.textContent = err.message;
         errEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Summarize';
+        btn.classList.remove('loading');
     }
 });
 </script>

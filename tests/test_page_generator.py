@@ -7,6 +7,7 @@ from core.page_generator import (
     _format_duration,
     _format_date,
     _build_youtube_timestamp_url,
+    _build_template_context,
     generate_page,
 )
 from core.ingestion import VideoMetadata
@@ -151,3 +152,99 @@ class TestGeneratePage:
 
         html = html_path.read_text(encoding="utf-8")
         assert 'lang="en"' in html
+
+    def test_reading_time_in_context(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        context = _build_template_context(
+            metadata, analysis, cards, "og-thumbnail.png", tmp_path
+        )
+        assert "reading_time" in context
+        assert "min read" in context["reading_time"]
+
+    def test_reading_time_displayed_in_html(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "min read" in html
+
+    def test_scene_counter_badges(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "1 / 2" in html
+        assert "2 / 2" in html
+        assert "scene-counter" in html
+
+    def test_scene_ids(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert 'id="scene-1"' in html
+        assert 'id="scene-2"' in html
+
+    def test_scroll_progress_bar(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "scroll-progress" in html
+
+    def test_back_to_top_button(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "back-to-top" in html
+
+    def test_sticky_bottom_bar(self, tmp_path):
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "sticky-bar" in html
+
+    def test_toc_not_shown_for_few_scenes(self, tmp_path):
+        """TOC should not render when there are fewer than 8 scenes."""
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        # Only 2 scenes in test data, TOC HTML elements should not appear
+        assert "Jump to scene" not in html
+        assert 'id="toc"' not in html
+
+    def test_toc_shown_for_many_scenes(self, tmp_path):
+        """TOC should render when there are 8 or more scenes."""
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        # Add more segments to reach 8
+        for i in range(6):
+            analysis.segments.append(VideoSegment(
+                timestamp=float(180 + i * 60),
+                timestamp_display=f"{3 + i}:00",
+                headline=f"Scene {i + 3}",
+                narration=f"Narration for scene {i + 3}.",
+                visual_description="Visual.",
+                transition="Meanwhile...",
+            ))
+            card_path = tmp_path / "cards" / f"card-{i + 2:02d}.webp"
+            card_path.write_bytes(b"fake webp data")
+            cards.append(card_path)
+
+        html_path = generate_page(metadata, analysis, cards, og_path, tmp_path)
+        html = html_path.read_text(encoding="utf-8")
+        assert "toc-toggle" in html
+        assert "Jump to scene" in html
+
+    def test_reading_time_minimum_one_minute(self, tmp_path):
+        """Reading time should be at least 1 min even for very short content."""
+        metadata, analysis, cards, og_path = self._make_test_data(tmp_path)
+
+        context = _build_template_context(
+            metadata, analysis, cards, "og-thumbnail.png", tmp_path
+        )
+        assert context["reading_time"] == "1 min read"

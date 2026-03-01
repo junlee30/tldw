@@ -46,6 +46,18 @@
             padding: 0 20px;
         }
 
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: #ff0033;
+            z-index: 1000;
+            transition: none;
+        }
+
         /* Header */
         .header {
             padding: 48px 0 32px;
@@ -143,7 +155,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: #666;
+            color: rgba(255, 0, 51, 0.6);
             margin-bottom: 12px;
         }
 
@@ -156,8 +168,8 @@
 
         .prologue-text, .epilogue-text {
             font-size: 16px;
-            color: #bbb;
-            line-height: 1.8;
+            color: #d0d0d0;
+            line-height: 1.75;
         }
 
         /* Story Scenes */
@@ -172,6 +184,99 @@
             letter-spacing: 1.5px;
             color: #666;
             margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        /* Table of Contents */
+        .toc {
+            margin-bottom: 32px;
+        }
+
+        .toc-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #111;
+            border: 1px solid #1e1e1e;
+            color: #ccc;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .toc-toggle:hover {
+            border-color: #333;
+            color: #fff;
+        }
+
+        .toc-toggle svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            transition: transform 0.2s;
+        }
+
+        .toc.open .toc-toggle svg {
+            transform: rotate(180deg);
+        }
+
+        .toc-list {
+            list-style: none;
+            margin-top: 16px;
+            display: none;
+            background: #111;
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .toc.open .toc-list {
+            display: block;
+        }
+
+        .toc-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #1a1a1a;
+            text-decoration: none;
+            color: #ccc;
+            font-size: 14px;
+            transition: background 0.15s;
+        }
+
+        .toc-item:last-child {
+            border-bottom: none;
+        }
+
+        .toc-item:hover {
+            background: #1a1a1a;
+        }
+
+        .toc-num {
+            font-weight: 700;
+            color: #555;
+            font-size: 12px;
+            min-width: 20px;
+        }
+
+        .toc-headline {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .toc-time {
+            color: #555;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
         .scene {
@@ -212,8 +317,17 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 40px 28px 24px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            padding: 60px 28px 24px;
+            background: linear-gradient(transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.85) 100%);
+        }
+
+        .scene-counter {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
         }
 
         .scene-headline {
@@ -239,10 +353,10 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
+            font-size: 13px;
             color: #888;
             background: #1a1a1a;
-            padding: 5px 14px;
+            padding: 10px 16px;
             border-radius: 100px;
             text-decoration: none;
             transition: background 0.2s, color 0.2s;
@@ -254,8 +368,8 @@
         }
 
         .scene-timestamp svg {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             fill: currentColor;
         }
 
@@ -300,6 +414,50 @@
             color: #fff;
         }
 
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #333;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, background 0.2s;
+            z-index: 900;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .back-to-top:hover {
+            background: rgba(50, 50, 50, 0.9);
+            color: #fff;
+        }
+
+        .back-to-top svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Sticky Bottom Bar — Mobile Only */
+        .sticky-bar {
+            display: none;
+        }
+
         /* Mobile */
         @media (max-width: 640px) {
             .video-title {
@@ -308,6 +466,10 @@
 
             .prologue, .epilogue {
                 padding: 20px;
+            }
+
+            .scene {
+                margin-bottom: 36px;
             }
 
             .scene-headline {
@@ -319,16 +481,79 @@
             }
 
             .scene-frame-overlay {
-                padding: 32px 20px 18px;
+                padding: 48px 20px 18px;
             }
 
             .header {
                 padding: 32px 0 24px;
             }
+
+            .watch-btn {
+                padding: 14px 28px;
+            }
+
+            .footer-cta {
+                padding: 16px 32px;
+            }
+
+            .footer {
+                padding-bottom: 100px;
+            }
+
+            .back-to-top {
+                bottom: 80px;
+                right: 16px;
+            }
+
+            /* Sticky Bottom Bar */
+            .sticky-bar {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 950;
+                background: rgba(15, 15, 15, 0.85);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-top: 1px solid #1e1e1e;
+                padding: 12px 20px;
+                padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .sticky-bar-scene {
+                font-size: 13px;
+                font-weight: 600;
+                color: #aaa;
+            }
+
+            .sticky-bar-watch {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: #ff0033;
+                color: #fff;
+                text-decoration: none;
+                padding: 10px 20px;
+                border-radius: 100px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .sticky-bar-watch svg {
+                width: 14px;
+                height: 14px;
+                fill: currentColor;
+            }
         }
     </style>
 </head>
 <body>
+
+<!-- Scroll Progress Bar -->
+<div class="scroll-progress" id="scroll-progress"></div>
 
 <div class="container">
 
@@ -342,6 +567,7 @@
             <span>{{ channel }}</span>
             <span>{{ duration }}</span>
             {% if upload_date %}<span>{{ upload_date }}</span>{% endif %}
+            {% if reading_time %}<span>{{ reading_time }}</span>{% endif %}
         </div>
 
         <!-- Prologue -->
@@ -361,8 +587,27 @@
     <section class="story-section">
         <div class="story-section-title">The Story ({{ scenes|length }} scenes)</div>
 
+        {% if scenes|length >= 8 %}
+        <!-- Table of Contents -->
+        <nav class="toc" id="toc">
+            <button class="toc-toggle" id="toc-toggle" aria-expanded="false">
+                Jump to scene
+                <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+            <ol class="toc-list" id="toc-list">
+                {% for scene in scenes %}
+                <a href="#scene-{{ loop.index }}" class="toc-item">
+                    <span class="toc-num">{{ loop.index }}</span>
+                    <span class="toc-headline">{{ scene.headline }}</span>
+                    <span class="toc-time">{{ scene.timestamp_display }}</span>
+                </a>
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
+
         {% for scene in scenes %}
-        <article class="scene">
+        <article class="scene" id="scene-{{ loop.index }}">
             {% if scene.transition %}
             <div class="scene-transition">{{ scene.transition }}</div>
             {% endif %}
@@ -370,6 +615,7 @@
             <div class="scene-frame">
                 <img src="{{ scene.image_path }}" alt="{{ scene.headline }}" loading="lazy" width="1280" height="720">
                 <div class="scene-frame-overlay">
+                    <div class="scene-counter">{{ scene.index }} / {{ scene.total }}</div>
                     <div class="scene-headline">{{ scene.headline }}</div>
                 </div>
             </div>
@@ -406,6 +652,20 @@
 
 </div>
 
+<!-- Back to Top Button -->
+<button class="back-to-top" id="back-to-top" aria-label="Back to top">
+    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+</button>
+
+<!-- Sticky Bottom Bar — Mobile Only -->
+<div class="sticky-bar" id="sticky-bar">
+    <span class="sticky-bar-scene" id="sticky-bar-scene">Scene 1 / {{ scenes|length }}</span>
+    <a href="{{ video_url }}" target="_blank" rel="noopener" class="sticky-bar-watch">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Watch
+    </a>
+</div>
+
 <script>
     // Scroll fade-in via IntersectionObserver
     const observer = new IntersectionObserver((entries) => {
@@ -418,6 +678,64 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.scene').forEach(scene => observer.observe(scene));
+
+    // Scroll Progress Bar
+    const progressBar = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', function() {
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    }, { passive: true });
+
+    // Back to Top Button
+    const backToTop = document.getElementById('back-to-top');
+    window.addEventListener('scroll', function() {
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        if (scrollTop > 600) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    }, { passive: true });
+
+    backToTop.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Sticky Bottom Bar — Scene Tracking via IntersectionObserver
+    const scenes = document.querySelectorAll('.scene');
+    const stickyLabel = document.getElementById('sticky-bar-scene');
+    if (scenes.length > 0 && stickyLabel) {
+        const sceneObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = entry.target.getAttribute('id').replace('scene-', '');
+                    stickyLabel.textContent = 'Scene ' + idx + ' / ' + scenes.length;
+                }
+            });
+        }, { threshold: 0.3 });
+
+        scenes.forEach(scene => sceneObserver.observe(scene));
+    }
+
+    // Table of Contents Toggle
+    const tocToggle = document.getElementById('toc-toggle');
+    const toc = document.getElementById('toc');
+    if (tocToggle && toc) {
+        tocToggle.addEventListener('click', function() {
+            const isOpen = toc.classList.toggle('open');
+            tocToggle.setAttribute('aria-expanded', isOpen);
+        });
+
+        // Auto-close when a TOC link is tapped
+        toc.querySelectorAll('.toc-item').forEach(function(link) {
+            link.addEventListener('click', function() {
+                toc.classList.remove('open');
+                tocToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
 </script>
 
 </body>

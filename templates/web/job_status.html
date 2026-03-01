@@ -27,6 +27,17 @@
                 {% endif %}
             </div>
             <div class="status-step" id="status-step">{{ job.step or '' }}</div>
+            {% if job.status not in ('completed', 'failed') %}
+            <div class="progress-steps" id="progress-steps">
+                <div class="progress-step" data-step="1"></div>
+                <div class="progress-step" data-step="2"></div>
+                <div class="progress-step" data-step="3"></div>
+                <div class="progress-step" data-step="4"></div>
+                <div class="progress-step" data-step="5"></div>
+                <div class="progress-step" data-step="6"></div>
+            </div>
+            <div class="progress-label" id="progress-label"></div>
+            {% endif %}
             {% if job.status == 'failed' %}
             <div class="error-msg">{{ job.error }}</div>
             <a href="/" class="back-link">Back to home</a>
@@ -44,6 +55,21 @@ async function poll() {
         const res = await fetch('/api/jobs/' + jobId);
         const job = await res.json();
         document.getElementById('status-step').textContent = job.step || '';
+        // Update progress steps
+        const stepMatch = (job.step || '').match(/Step (\d+)\/(\d+)/);
+        if (stepMatch) {
+            const current = parseInt(stepMatch[1], 10);
+            const total = parseInt(stepMatch[2], 10);
+            const steps = document.querySelectorAll('#progress-steps .progress-step');
+            steps.forEach(function(el) {
+                const s = parseInt(el.getAttribute('data-step'), 10);
+                el.classList.remove('completed', 'active');
+                if (s < current) el.classList.add('completed');
+                else if (s === current) el.classList.add('active');
+            });
+            const label = document.getElementById('progress-label');
+            if (label) label.textContent = 'Step ' + current + ' of ' + total;
+        }
         if (job.status === 'completed' && job.video_id) {
             document.getElementById('status-label').textContent = 'Done! Redirecting...';
             window.location.href = '/s/' + job.video_id + '/';
