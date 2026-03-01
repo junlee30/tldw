@@ -14,7 +14,9 @@
                 {% if job.status == 'failed' %}
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="#ff4444"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 {% else %}
-                <div class="spinner"></div>
+                <div class="loading-bars">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
                 {% endif %}
             </div>
             <div class="status-label" id="status-label">

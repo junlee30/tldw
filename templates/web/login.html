@@ -3,7 +3,8 @@
 {% block body %}
 <div class="login-container">
     <div class="login-card">
-        <div class="brand">TL;DW</div>
+        <div class="login-brand">TL;DW</div>
+        <p class="login-tagline">Too Long; Didn't Watch</p>
         <p class="login-subtitle">Enter password to continue</p>
         {% if request.query_params.get('error') %}
         <div class="error-msg">Wrong password. Try again.</div>

@@ -25,7 +25,7 @@
     <!-- Google Fonts: Inter + CJK support -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after {
@@ -36,16 +36,29 @@
 
         body {
             background: #0a0a0a;
-            color: #e8e8e8;
-            font-family: 'Inter', 'Noto Sans KR', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #e8e6e1;
+            font-family: 'DM Sans', 'Noto Sans KR', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle film grain texture */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            opacity: 0.018;
+            pointer-events: none;
+            z-index: 10000;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
         }
 
         .container {
             max-width: 760px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
 
         /* Scroll Progress Bar */
@@ -55,52 +68,57 @@
             left: 0;
             width: 0%;
             height: 3px;
-            background: #ff0033;
-            z-index: 1000;
+            background: linear-gradient(90deg, #ff0033, #ff1a4a);
+            z-index: 10001;
             transition: none;
         }
 
         /* Header */
         .header {
-            padding: 48px 0 32px;
-            border-bottom: 1px solid #1a1a1a;
+            padding: 56px 0 40px;
+            border-bottom: 1px solid #1a1918;
         }
 
         .brand {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
             background: #fff;
             color: #0a0a0a;
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 100px;
             font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            margin-bottom: 24px;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 32px;
             text-decoration: none;
             transition: background 0.2s;
         }
 
         .brand:hover {
-            background: #e0e0e0;
+            background: #e8e6e1;
         }
 
         .video-title {
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1.3;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 38px;
+            font-weight: 400;
+            line-height: 1.15;
             color: #fff;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
         }
 
         .video-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 24px;
+            gap: 6px 20px;
+            font-size: 12px;
+            color: #5c5752;
+            margin-bottom: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 500;
         }
 
         .video-meta span {
@@ -109,23 +127,69 @@
             gap: 6px;
         }
 
+        /* Prologue — editorial left accent */
+        .prologue {
+            border-left: 3px solid #ff0033;
+            padding: 2px 0 2px 28px;
+            margin-bottom: 40px;
+            background: none;
+            border-radius: 0;
+        }
+
+        .epilogue {
+            border-left: 3px solid #ff0033;
+            padding: 2px 0 2px 28px;
+            margin-top: 24px;
+            margin-bottom: 48px;
+            background: none;
+            border-radius: 0;
+        }
+
+        .block-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff0033;
+            opacity: 0.45;
+            margin-bottom: 12px;
+        }
+
+        .prologue-headline {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 22px;
+            font-weight: 400;
+            font-style: italic;
+            color: #fff;
+            margin-bottom: 14px;
+            line-height: 1.35;
+        }
+
+        .prologue-text, .epilogue-text {
+            font-size: 16px;
+            color: #a8a29e;
+            line-height: 1.8;
+        }
+
         .watch-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: #ff0033;
             color: #fff;
             text-decoration: none;
-            padding: 12px 28px;
+            padding: 14px 32px;
             border-radius: 100px;
             font-weight: 600;
-            font-size: 15px;
-            margin-top: 24px;
-            transition: background 0.2s;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            margin-top: 32px;
+            transition: background 0.2s, box-shadow 0.35s;
         }
 
         .watch-btn:hover {
-            background: #cc0029;
+            background: #e6002e;
+            box-shadow: 0 0 28px rgba(255, 0, 51, 0.25);
         }
 
         .watch-btn svg {
@@ -134,93 +198,54 @@
             fill: currentColor;
         }
 
-        /* Prologue & Epilogue */
-        .prologue, .epilogue {
-            background: #111;
-            border: 1px solid #1e1e1e;
-            border-radius: 12px;
-            padding: 28px 32px;
-            margin-bottom: 8px;
-        }
-
-        .prologue {
-            margin-bottom: 40px;
-        }
-
-        .epilogue {
-            margin-top: 16px;
-            margin-bottom: 40px;
-        }
-
-        .block-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255, 0, 51, 0.6);
-            margin-bottom: 12px;
-        }
-
-        .prologue-headline {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-
-        .prologue-text, .epilogue-text {
-            font-size: 16px;
-            color: #d0d0d0;
-            line-height: 1.75;
-        }
-
         /* Story Scenes */
         .story-section {
             padding: 8px 0 40px;
         }
 
         .story-section-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #666;
-            margin-bottom: 32px;
+            letter-spacing: 2px;
+            color: #3d3a36;
+            margin-bottom: 40px;
             padding-bottom: 16px;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #1a1918;
         }
 
         /* Table of Contents */
         .toc {
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
         .toc-toggle {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #111;
-            border: 1px solid #1e1e1e;
-            color: #ccc;
-            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid #252320;
+            color: #8a8580;
+            padding: 10px 22px;
             border-radius: 100px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             font-family: inherit;
             cursor: pointer;
+            letter-spacing: 0.2px;
             transition: border-color 0.2s, color 0.2s;
         }
 
         .toc-toggle:hover {
-            border-color: #333;
-            color: #fff;
+            border-color: #3d3a36;
+            color: #e8e6e1;
         }
 
         .toc-toggle svg {
             width: 14px;
             height: 14px;
             fill: currentColor;
-            transition: transform 0.2s;
+            transition: transform 0.25s;
         }
 
         .toc.open .toc-toggle svg {
@@ -231,9 +256,8 @@
             list-style: none;
             margin-top: 16px;
             display: none;
-            background: #111;
-            border: 1px solid #1e1e1e;
-            border-radius: 12px;
+            border: 1px solid #1e1d1c;
+            border-radius: 10px;
             overflow: hidden;
         }
 
@@ -244,13 +268,13 @@
         .toc-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            border-bottom: 1px solid #1a1a1a;
+            gap: 14px;
+            padding: 13px 22px;
+            border-bottom: 1px solid #1a1918;
             text-decoration: none;
-            color: #ccc;
+            color: #8a8580;
             font-size: 14px;
-            transition: background 0.15s;
+            transition: background 0.15s, color 0.15s;
         }
 
         .toc-item:last-child {
@@ -258,14 +282,16 @@
         }
 
         .toc-item:hover {
-            background: #1a1a1a;
+            background: #141312;
+            color: #e8e6e1;
         }
 
         .toc-num {
             font-weight: 700;
-            color: #555;
-            font-size: 12px;
+            color: #3d3a36;
+            font-size: 11px;
             min-width: 20px;
+            font-variant-numeric: tabular-nums;
         }
 
         .toc-headline {
@@ -273,19 +299,23 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-weight: 400;
         }
 
         .toc-time {
-            color: #555;
+            color: #3d3a36;
             font-size: 12px;
             white-space: nowrap;
+            font-variant-numeric: tabular-nums;
         }
 
+        /* Scene cards */
         .scene {
-            margin-bottom: 48px;
+            margin-bottom: 56px;
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(28px);
+            transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .scene.visible {
@@ -293,25 +323,41 @@
             transform: translateY(0);
         }
 
+        /* Decorative scene divider */
         .scene-transition {
-            font-size: 15px;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 16px;
             font-style: italic;
-            color: #888;
-            padding: 0 0 16px;
+            color: #5c5752;
+            padding: 12px 0 24px;
             text-align: center;
+            position: relative;
+        }
+
+        .scene-transition::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 1px;
+            background: #2a2825;
+            margin: 0 auto 20px;
         }
 
         .scene-frame {
             position: relative;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            margin-bottom: 0;
         }
 
         .scene-frame img {
             width: 100%;
             height: auto;
             display: block;
+            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .scene-frame:hover img {
+            transform: scale(1.025);
         }
 
         .scene-frame-overlay {
@@ -319,101 +365,110 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 60px 28px 24px;
-            background: linear-gradient(transparent 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.85) 100%);
+            padding: 80px 28px 26px;
+            background: linear-gradient(transparent 0%, rgba(0,0,0,0.12) 20%, rgba(0,0,0,0.82) 100%);
         }
 
         .scene-counter {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 10px;
+            font-variant-numeric: tabular-nums;
         }
 
         .scene-headline {
-            font-size: 22px;
-            font-weight: 900;
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-size: 24px;
+            font-weight: 400;
             color: #fff;
-            line-height: 1.3;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+            line-height: 1.25;
+            text-shadow: 0 2px 16px rgba(0,0,0,0.5);
         }
 
         .scene-body {
-            padding: 20px 4px 0;
+            padding: 24px 0 0;
         }
 
         .scene-narration {
             font-size: 16px;
-            color: #ccc;
-            line-height: 1.8;
-            margin-bottom: 12px;
+            color: #b0aaa4;
+            line-height: 1.85;
+            margin-bottom: 16px;
         }
 
         .scene-timestamp {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
-            color: #888;
-            background: #1a1a1a;
-            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #5c5752;
+            background: #141312;
+            border: 1px solid #1e1d1c;
+            padding: 8px 16px;
             border-radius: 100px;
             text-decoration: none;
-            transition: background 0.2s, color 0.2s;
+            font-variant-numeric: tabular-nums;
+            transition: border-color 0.25s, color 0.25s, background 0.25s;
         }
 
         .scene-timestamp:hover {
-            background: #2a2a2a;
-            color: #fff;
+            border-color: #ff0033;
+            color: #ff0033;
+            background: rgba(255, 0, 51, 0.04);
         }
 
         .scene-timestamp svg {
-            width: 14px;
-            height: 14px;
+            width: 13px;
+            height: 13px;
             fill: currentColor;
         }
 
         /* Footer */
         .footer {
-            padding: 40px 0 64px;
-            border-top: 1px solid #1a1a1a;
+            padding: 48px 0 72px;
+            border-top: 1px solid #1a1918;
             text-align: center;
         }
 
         .footer-cta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: #fff;
             color: #0a0a0a;
             text-decoration: none;
-            padding: 14px 32px;
+            padding: 14px 36px;
             border-radius: 100px;
             font-weight: 700;
-            font-size: 15px;
-            transition: background 0.2s;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            transition: transform 0.25s, box-shadow 0.35s;
             margin-bottom: 24px;
         }
 
         .footer-cta:hover {
-            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(255, 255, 255, 0.06);
         }
 
         .footer-text {
-            font-size: 13px;
-            color: #555;
+            font-size: 12px;
+            color: #3d3a36;
             margin-top: 16px;
+            letter-spacing: 0.3px;
         }
 
         .footer-text a {
-            color: #888;
+            color: #5c5752;
             text-decoration: none;
         }
 
         .footer-text a:hover {
-            color: #fff;
+            color: #e8e6e1;
         }
 
         /* Back to Top */
@@ -424,18 +479,18 @@
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid #333;
-            color: #ccc;
+            background: rgba(20, 19, 18, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid #252320;
+            color: #8a8580;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s, background 0.2s;
+            transition: opacity 0.3s, border-color 0.2s, color 0.2s;
             z-index: 900;
         }
 
@@ -445,8 +500,8 @@
         }
 
         .back-to-top:hover {
-            background: rgba(50, 50, 50, 0.9);
-            color: #fff;
+            border-color: #3d3a36;
+            color: #e8e6e1;
         }
 
         .back-to-top svg {
@@ -463,19 +518,19 @@
         /* Mobile */
         @media (max-width: 640px) {
             .video-title {
-                font-size: 22px;
+                font-size: 28px;
             }
 
             .prologue, .epilogue {
-                padding: 20px;
+                padding-left: 20px;
             }
 
             .scene {
-                margin-bottom: 36px;
+                margin-bottom: 40px;
             }
 
             .scene-headline {
-                font-size: 18px;
+                font-size: 20px;
             }
 
             .scene-narration {
@@ -483,11 +538,11 @@
             }
 
             .scene-frame-overlay {
-                padding: 48px 20px 18px;
+                padding: 56px 20px 20px;
             }
 
             .header {
-                padding: 32px 0 24px;
+                padding: 36px 0 28px;
             }
 
             .watch-btn {
@@ -515,10 +570,10 @@
                 left: 0;
                 right: 0;
                 z-index: 950;
-                background: rgba(15, 15, 15, 0.85);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border-top: 1px solid #1e1e1e;
+                background: rgba(10, 10, 10, 0.88);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border-top: 1px solid #1e1d1c;
                 padding: 12px 20px;
                 padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
                 align-items: center;
@@ -526,9 +581,10 @@
             }
 
             .sticky-bar-scene {
-                font-size: 13px;
-                font-weight: 600;
-                color: #aaa;
+                font-size: 12px;
+                font-weight: 500;
+                color: #5c5752;
+                letter-spacing: 0.3px;
             }
 
             .sticky-bar-watch {
