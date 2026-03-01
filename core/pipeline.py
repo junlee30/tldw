@@ -5,8 +5,8 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from config import OUTPUT_DIR
-from core.ingestion import ingest, extract_video_id, IngestionError, VideoMetadata
+from config import OUTPUT_DIR, AUDIO_ONLY_THRESHOLD
+from core.ingestion import ingest, extract_video_id, extract_audio, IngestionError, VideoMetadata
 from core.analysis import analyze
 from core.extraction import extract_frames
 from core.composition import compose_all_cards
@@ -64,13 +64,25 @@ def run_pipeline(youtube_url: str) -> PipelineResult:
 
     metadata = result.metadata
     video_path = result.video_path
+    audio_path = None
     save_metadata(metadata, output_dir)
     logger.info(f"video_duration:{metadata.duration}")
 
+    # Determine if audio-only analysis is needed
+    use_audio_only = metadata.duration > AUDIO_ONLY_THRESHOLD
+
     try:
         # Step 3: Analyze
-        logger.info("Step 2/6: Analyzing video with AI...")
-        analysis = analyze(video_path, metadata.duration, output_dir)
+        if use_audio_only:
+            logger.info(
+                f"Step 2/6: Video is {metadata.duration}s (>{AUDIO_ONLY_THRESHOLD}s), "
+                "using audio-only analysis..."
+            )
+            audio_path = extract_audio(video_path, output_dir)
+            analysis = analyze(audio_path, metadata.duration, output_dir, audio_only=True)
+        else:
+            logger.info("Step 2/6: Analyzing video with AI...")
+            analysis = analyze(video_path, metadata.duration, output_dir)
 
         # Step 4: Extract frames
         logger.info("Step 3/6: Extracting key frames...")
@@ -102,13 +114,19 @@ def run_pipeline(youtube_url: str) -> PipelineResult:
         )
 
     finally:
-        # Step 8: Cleanup downloaded video
+        # Step 8: Cleanup downloaded video and audio
         if video_path.exists():
             try:
                 video_path.unlink()
                 logger.debug(f"Cleaned up video file: {video_path}")
             except OSError:
                 logger.warning(f"Could not delete video file: {video_path}")
+        if audio_path and audio_path.exists():
+            try:
+                audio_path.unlink()
+                logger.debug(f"Cleaned up audio file: {audio_path}")
+            except OSError:
+                logger.warning(f"Could not delete audio file: {audio_path}")
 
     logger.info(f"Done! Open {html_path}")
 

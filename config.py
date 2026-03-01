@@ -34,6 +34,7 @@ GEMINI_MODEL = "gemini-2.5-flash"
 # --- Video constraints ---
 MAX_VIDEO_DURATION = 7200  # 2 hours in seconds
 MIN_VIDEO_DURATION = 10  # 10 seconds minimum
+AUDIO_ONLY_THRESHOLD = 2700  # seconds; videos longer than 45min use audio-only analysis
 
 # --- Card dimensions ---
 CARD_WIDTH = 1280

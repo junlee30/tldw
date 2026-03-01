@@ -9,6 +9,7 @@ from prompts.video_analysis import (
     VideoSegment,
     VideoAnalysisResult,
     build_analysis_prompt,
+    build_audio_analysis_prompt,
     compute_scene_count,
 )
 from core.analysis import (
@@ -184,6 +185,68 @@ class TestAnalysisCache:
     def test_load_missing_file(self, tmp_path):
         result = load_analysis_cache(tmp_path)
         assert result is None
+
+
+class TestVideoSegmentOptionalVisualDescription:
+    def test_visual_description_defaults_empty(self):
+        segment = VideoSegment(
+            timestamp=10.0,
+            timestamp_display="0:10",
+            headline="Test",
+            narration="Some narration here.",
+        )
+        assert segment.visual_description == ""
+
+    def test_visual_description_can_be_set(self):
+        segment = _make_segment(visual_description="A chart on screen")
+        assert segment.visual_description == "A chart on screen"
+
+
+class TestAudioOnlyFlag:
+    def test_audio_only_defaults_false(self):
+        result = _make_result()
+        assert result.audio_only is False
+
+    def test_audio_only_roundtrip(self, tmp_path):
+        result = _make_result()
+        result.audio_only = True
+        _save_analysis_cache(result, tmp_path)
+        loaded = load_analysis_cache(tmp_path)
+        assert loaded is not None
+        assert loaded.audio_only is True
+
+    def test_audio_only_false_roundtrip(self, tmp_path):
+        result = _make_result()
+        _save_analysis_cache(result, tmp_path)
+        loaded = load_analysis_cache(tmp_path)
+        assert loaded is not None
+        assert loaded.audio_only is False
+
+
+class TestBuildAudioAnalysisPrompt:
+    def test_includes_duration(self):
+        prompt = build_audio_analysis_prompt(3000)
+        assert "3000" in prompt
+        assert "50:00" in prompt
+
+    def test_no_visual_references(self):
+        prompt = build_audio_analysis_prompt(3000)
+        assert "visual" not in prompt.lower()
+        assert "frame" not in prompt.lower()
+        assert "comic book" not in prompt.lower()
+
+    def test_has_audio_language(self):
+        prompt = build_audio_analysis_prompt(3000)
+        assert "audio" in prompt.lower()
+
+    def test_scene_count_in_prompt(self):
+        prompt = build_audio_analysis_prompt(3000)
+        # 50 min → target 20 (capped), floor 16
+        assert "16-20" in prompt
+
+    def test_same_language_instruction(self):
+        prompt = build_audio_analysis_prompt(3000)
+        assert "SAME LANGUAGE" in prompt
 
 
 class TestAnalyze:

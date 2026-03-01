@@ -2,6 +2,7 @@
 
 import logging
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -146,6 +147,44 @@ def download_video(url: str, output_dir: Path) -> Path:
 
     logger.info(f"Downloaded to {video_path}")
     return video_path
+
+
+def extract_audio(video_path: Path, output_dir: Path) -> Path:
+    """Extract audio track from video file using ffmpeg.
+
+    Tries stream copy first (fast), falls back to re-encoding if that fails.
+    """
+    audio_path = output_dir / f"{video_path.stem}.m4a"
+
+    # Try stream copy first (fast, no re-encoding)
+    cmd = [
+        "ffmpeg", "-i", str(video_path),
+        "-vn", "-acodec", "copy",
+        "-y", str(audio_path),
+    ]
+    logger.info("Extracting audio track (stream copy)...")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        # Fall back to re-encoding
+        logger.warning("Stream copy failed, re-encoding audio...")
+        cmd = [
+            "ffmpeg", "-i", str(video_path),
+            "-vn", "-acodec", "aac", "-b:a", "128k",
+            "-y", str(audio_path),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            raise IngestionError(
+                f"Failed to extract audio: {result.stderr}"
+            )
+
+    if not audio_path.exists():
+        raise IngestionError("Extracted audio file not found")
+
+    logger.info(f"Audio extracted to {audio_path}")
+    return audio_path
 
 
 def ingest(url: str, output_dir: Path) -> IngestionResult:

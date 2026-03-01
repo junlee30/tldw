@@ -13,7 +13,7 @@ class VideoSegment(BaseModel):
     narration: str = Field(
         description="3-5 sentence story-style narration of what happens in this scene"
     )
-    visual_description: str = Field(description="Brief description of what's visually happening on screen")
+    visual_description: str = Field(default="", description="Brief description of what's visually happening on screen")
     transition: str = Field(
         default="",
         description="Narrative connector to the next scene (e.g., 'But then...', 'Meanwhile...')"
@@ -33,6 +33,10 @@ class VideoAnalysisResult(BaseModel):
     language: str = Field(
         default="en",
         description="ISO 639-1 language code of the video's primary spoken language"
+    )
+    audio_only: bool = Field(
+        default=False,
+        description="Whether this analysis was produced from audio only"
     )
     segments: list[VideoSegment] = Field(
         description="List of scenes from the video, covering the full timeline"
@@ -128,20 +132,93 @@ def compute_scene_count(duration_seconds: int) -> tuple[int, int]:
     return floor, target
 
 
-def build_analysis_prompt(duration_seconds: int) -> str:
-    """Build the analysis prompt with duration injected."""
+AUDIO_ANALYSIS_PROMPT = """\
+You are a storyteller narrating a summary adaptation of this audio recording. \
+Your goal is to **retell the entire content** so readers experience the full discussion without listening.
+
+The recording is {duration_display} long ({duration_seconds} seconds total). \
+Produce {min_scenes}-{max_scenes} scenes that cover the full timeline from beginning to end.
+
+IMPORTANT: Respond in the SAME LANGUAGE as the audio. If the audio is in Korean, write \
+everything in Korean. If it's in English, write in English. Match the audio's language exactly.
+
+I repeat: ALL text output (prologue, headlines, narrations, epilogue, transitions) must be \
+in the SAME LANGUAGE as the audio.
+
+Do NOT skip sections — cover the full timeline from beginning to end. Every major topic, \
+argument, demonstration, or narrative development should have its own scene. If a section \
+of the audio introduces a new idea or shifts focus, give it a dedicated scene.
+
+## CRITICAL: Timestamp accuracy
+
+For each scene, choose a timestamp that falls within the section being discussed. \
+Timestamps should be spread evenly across the full recording duration.
+
+Skip pre-roll ads, sponsor segments, and outros — only pick timestamps from actual content.
+
+## Scene content
+
+For each scene:
+1. Choose timestamps that are SPREAD across the entire recording duration — don't cluster them
+2. Pick timestamps at the start of each topic or discussion point
+3. Write a short, punchy headline (max 8 words) that captures the essence of this scene
+4. Write a 3-5 sentence narration telling what happens — like you're narrating a story, not \
+summarizing a report. Use vivid, engaging language.
+5. Write a short transition phrase that connects to the next scene (e.g., "But then...", \
+"What happened next changed everything...", "Meanwhile..."). Leave empty for the last scene.
+
+Structure the scenes as a narrative arc:
+- Opening scenes: SETUP — introduce the subject, setting, and stakes
+- Middle scenes: DEVELOPMENT — build tension, show progression, reveal complications
+- Peak scene: CLIMAX — the most dramatic or important moment
+- Final scenes: RESOLUTION — outcome, aftermath, or conclusion
+
+Also provide:
+- A one-line summary of the entire recording (max 15 words)
+- A PROLOGUE: 3-4 sentences setting the stage before the first scene (like a book's opening paragraph)
+- An EPILOGUE: 2-3 sentences wrapping up the story with a takeaway or closing thought
+- The ISO 639-1 language code of the audio's primary spoken language (e.g., "en", "ko", "ja")
+- The single most interesting timestamp for the thumbnail
+
+IMPORTANT RULES:
+- Timestamps must be valid (between 0 and {duration_seconds})
+- Space scenes roughly evenly across the recording duration
+- Headlines should be engaging and specific, not generic
+- Narrations should make the reader feel like they're listening to the recording unfold
+- Produce {min_scenes}-{max_scenes} scenes total
+"""
+
+
+def _format_duration(duration_seconds: int) -> str:
+    """Format duration in seconds to a human-readable string."""
     hours = duration_seconds // 3600
     minutes = (duration_seconds % 3600) // 60
     seconds = duration_seconds % 60
 
     if hours > 0:
-        duration_display = f"{hours}:{minutes:02d}:{seconds:02d}"
-    else:
-        duration_display = f"{minutes}:{seconds:02d}"
+        return f"{hours}:{minutes:02d}:{seconds:02d}"
+    return f"{minutes}:{seconds:02d}"
 
+
+def build_analysis_prompt(duration_seconds: int) -> str:
+    """Build the analysis prompt with duration injected."""
+    duration_display = _format_duration(duration_seconds)
     min_scenes, max_scenes = compute_scene_count(duration_seconds)
 
     return ANALYSIS_PROMPT.format(
+        duration_seconds=duration_seconds,
+        duration_display=duration_display,
+        min_scenes=min_scenes,
+        max_scenes=max_scenes,
+    )
+
+
+def build_audio_analysis_prompt(duration_seconds: int) -> str:
+    """Build the audio-only analysis prompt with duration injected."""
+    duration_display = _format_duration(duration_seconds)
+    min_scenes, max_scenes = compute_scene_count(duration_seconds)
+
+    return AUDIO_ANALYSIS_PROMPT.format(
         duration_seconds=duration_seconds,
         duration_display=duration_display,
         min_scenes=min_scenes,

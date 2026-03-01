@@ -2,7 +2,7 @@
 
 ## What This Project Does
 
-Converts YouTube videos into shareable visual story summaries (HTML pages with scene cards, narration, and OG images). Users submit a YouTube URL via the web app or CLI, and the pipeline downloads the video, sends it to Gemini for analysis, extracts key frames, and generates a self-contained summary page.
+Converts YouTube videos into shareable visual story summaries (HTML pages with scene cards, narration, and OG images). Users submit a YouTube URL via the web app or CLI, and the pipeline downloads the video, sends it to Gemini for analysis, extracts key frames, and generates a self-contained summary page. Videos longer than 45 minutes automatically use audio-only analysis to stay within Gemini's token limit.
 
 ## Stack
 
@@ -15,14 +15,14 @@ config.py              # All constants and env var loading
 main.py                # CLI entry point
 core/
   pipeline.py          # 6-step orchestrator: ingest → analyze → extract → compose → og → html
-  ingestion.py         # yt-dlp: download video + fetch metadata
-  analysis.py          # Gemini: upload video, analyze, cache results as JSON
+  ingestion.py         # yt-dlp: download video + fetch metadata + ffmpeg audio extraction
+  analysis.py          # Gemini: upload video/audio, analyze, cache results as JSON
   extraction.py        # ffmpeg: extract frames at timestamps, pick sharpest (Laplacian)
   composition.py       # Pillow: resize frames to 1280x720 WebP cards
   og_image.py          # Pillow: 1200x630 OG thumbnail with branding overlay
   page_generator.py    # Jinja2: render summary HTML page, metadata persistence
 prompts/
-  video_analysis.py    # Pydantic models + Gemini prompt template
+  video_analysis.py    # Pydantic models + Gemini prompt templates (video + audio-only)
 web/
   app.py               # FastAPI app with auth middleware
   auth.py              # HMAC-SHA256 signed cookie sessions (30-day TTL)
@@ -36,13 +36,13 @@ templates/
   summary_page.html    # Self-contained dark-theme summary output
   web/                 # Web app templates (home, login, job status)
 assets/                # Fonts (Inter), watermark overlay, favicon
-tests/                 # 75+ unit tests (ingestion, analysis, extraction, composition, page gen)
+tests/                 # 85+ unit tests (ingestion, analysis, extraction, composition, page gen)
 ```
 
 ## Pipeline Flow
 
 1. **Ingest** — yt-dlp downloads video (480p max), extracts metadata, saves `metadata.json`
-2. **Analyze** — Upload to Gemini File API, analyze with structured prompt, cache as `analysis.json`
+2. **Analyze** — Upload to Gemini File API, analyze with structured prompt, cache as `analysis.json`. Videos >45min use audio-only upload (ffmpeg extracts audio track) to stay within Gemini's 1M token limit; a separate audio-specific prompt omits visual references.
 3. **Extract Frames** — ffmpeg pulls frames at each segment timestamp, picks sharpest
 4. **Compose Cards** — Resize frames to 1280x720 WebP
 5. **Generate OG Image** — Darken frame + gradient + brand pill + title
@@ -104,7 +104,7 @@ uvicorn web.app:app --host 0.0.0.0 --port 8080
 ## Key Config Values (config.py)
 
 - Telegram: optional notifications to a channel on job success/failure
-- Video: 10s min, 3600s (1hr) max duration
+- Video: 10s min, 7200s (2hr) max duration, audio-only analysis above 2700s (45min)
 - Download: 480p max quality
 - Cards: 1280x720, WebP quality 90
 - OG image: 1200x630 PNG

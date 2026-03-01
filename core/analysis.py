@@ -20,6 +20,7 @@ from config import (
 from prompts.video_analysis import (
     VideoAnalysisResult,
     build_analysis_prompt,
+    build_audio_analysis_prompt,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,10 +62,13 @@ def _upload_video(client: genai.Client, video_path: Path):
 
 
 def _analyze_video(
-    client: genai.Client, uploaded_file, duration: int
+    client: genai.Client, uploaded_file, duration: int, audio_only: bool = False
 ) -> VideoAnalysisResult:
-    """Run Gemini analysis on the uploaded video."""
-    prompt = build_analysis_prompt(duration)
+    """Run Gemini analysis on the uploaded file (video or audio)."""
+    if audio_only:
+        prompt = build_audio_analysis_prompt(duration)
+    else:
+        prompt = build_analysis_prompt(duration)
 
     logger.info("Analyzing video with Gemini...")
 
@@ -142,7 +146,7 @@ def _cleanup_uploaded_file(client: genai.Client, uploaded_file) -> None:
 
 
 def analyze(
-    video_path: Path, duration: int, output_dir: Path
+    file_path: Path, duration: int, output_dir: Path, audio_only: bool = False
 ) -> VideoAnalysisResult:
     """Main analysis entry point: cache check -> upload -> analyze -> cache -> cleanup."""
     # Check cache first
@@ -152,9 +156,11 @@ def analyze(
 
     client = _create_client()
 
-    uploaded_file = _upload_video(client, video_path)
+    uploaded_file = _upload_video(client, file_path)
     try:
-        result = _analyze_video(client, uploaded_file, duration)
+        result = _analyze_video(client, uploaded_file, duration, audio_only=audio_only)
+        if audio_only:
+            result.audio_only = True
         _save_analysis_cache(result, output_dir)
         return result
     finally:
