@@ -9,6 +9,9 @@ from core.page_generator import (
     _build_youtube_timestamp_url,
     _build_template_context,
     generate_page,
+    save_metadata,
+    load_metadata,
+    render_summary_html,
 )
 from core.ingestion import VideoMetadata
 from prompts.video_analysis import VideoSegment, VideoAnalysisResult
@@ -248,3 +251,89 @@ class TestGeneratePage:
             metadata, analysis, cards, "og-thumbnail.png", tmp_path
         )
         assert context["reading_time"] == "1 min read"
+
+
+class TestMetadataPersistence:
+    def _make_metadata(self):
+        return VideoMetadata(
+            video_id="test123",
+            title="Test Video Title",
+            channel="Test Channel",
+            duration=300,
+            upload_date="20250115",
+            description="A test video about testing",
+            thumbnail_url="https://example.com/thumb.jpg",
+        )
+
+    def test_save_load_roundtrip(self, tmp_path):
+        metadata = self._make_metadata()
+        save_metadata(metadata, tmp_path)
+        loaded = load_metadata(tmp_path)
+
+        assert loaded is not None
+        assert loaded.video_id == metadata.video_id
+        assert loaded.title == metadata.title
+        assert loaded.channel == metadata.channel
+        assert loaded.duration == metadata.duration
+        assert loaded.upload_date == metadata.upload_date
+        assert loaded.description == metadata.description
+        assert loaded.thumbnail_url == metadata.thumbnail_url
+
+    def test_load_missing_file_returns_none(self, tmp_path):
+        assert load_metadata(tmp_path) is None
+
+    def test_load_corrupt_file_returns_none(self, tmp_path):
+        (tmp_path / "metadata.json").write_text("not valid json {{", encoding="utf-8")
+        assert load_metadata(tmp_path) is None
+
+
+class TestRenderSummaryHtml:
+    def _setup(self, tmp_path):
+        metadata = VideoMetadata(
+            video_id="test123",
+            title="Test Video Title",
+            channel="Test Channel",
+            duration=300,
+            upload_date="20250115",
+            description="A test video about testing",
+            thumbnail_url="https://example.com/thumb.jpg",
+        )
+        analysis = VideoAnalysisResult(
+            title_summary="A great test video",
+            prologue="This is where our story begins. The stage is set.",
+            epilogue="And that's how it ended.",
+            language="en",
+            segments=[
+                VideoSegment(
+                    timestamp=10.0,
+                    timestamp_display="0:10",
+                    headline="Introduction",
+                    narration="The host introduces the topic. Everyone listens.",
+                    visual_description="Title card.",
+                    transition="",
+                ),
+            ],
+            thumbnail_timestamp=10.0,
+        )
+        # Create card file
+        cards_dir = tmp_path / "cards"
+        cards_dir.mkdir()
+        (cards_dir / "card-00.webp").write_bytes(b"fake webp data")
+        # Create OG image
+        (tmp_path / "og-thumbnail.png").write_bytes(b"fake png data")
+        return metadata, analysis
+
+    def test_renders_html_string(self, tmp_path):
+        metadata, analysis = self._setup(tmp_path)
+        html = render_summary_html(metadata, analysis, tmp_path)
+
+        assert isinstance(html, str)
+        assert "Test Video Title" in html
+        assert "Introduction" in html
+        assert "card-00.webp" in html
+
+    def test_does_not_write_index_html(self, tmp_path):
+        metadata, analysis = self._setup(tmp_path)
+        render_summary_html(metadata, analysis, tmp_path)
+
+        assert not (tmp_path / "index.html").exists()

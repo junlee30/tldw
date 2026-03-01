@@ -7,6 +7,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 
 from config import OUTPUT_DIR, TEMPLATES_DIR
+from core.analysis import load_analysis_cache
+from core.page_generator import load_metadata, render_summary_html
 from web.auth import verify_password, create_session_token, COOKIE_NAME
 from web.db import get_job, list_jobs, find_job_by_video_id
 
@@ -80,7 +82,19 @@ async def job_status_page(request: Request, job_id: str):
 
 @router.get("/s/{video_id}/")
 async def serve_summary(video_id: str):
-    html_path = OUTPUT_DIR / video_id / "index.html"
+    output_dir = OUTPUT_DIR / video_id
+    if not output_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Summary not found")
+
+    # Try dynamic rendering with metadata + analysis
+    metadata = load_metadata(output_dir)
+    analysis = load_analysis_cache(output_dir)
+    if metadata is not None and analysis is not None:
+        html = render_summary_html(metadata, analysis, output_dir)
+        return HTMLResponse(html)
+
+    # Fallback: serve static index.html for old output dirs
+    html_path = output_dir / "index.html"
     if not html_path.exists():
         raise HTTPException(status_code=404, detail="Summary not found")
     html = html_path.read_text(encoding="utf-8")
@@ -91,7 +105,6 @@ async def serve_summary(video_id: str):
             '<a href="/" class="brand">TL;DW</a>',
             1,
         )
-        # Add hover style for the brand link
         html = html.replace(
             "margin-bottom: 24px;\n        }",
             "margin-bottom: 24px;\n            text-decoration: none;\n            transition: background 0.2s;\n        }\n\n        .brand:hover {\n            background: #e0e0e0;\n        }",

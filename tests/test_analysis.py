@@ -13,7 +13,7 @@ from prompts.video_analysis import (
 )
 from core.analysis import (
     _save_analysis_cache,
-    _load_analysis_cache,
+    load_analysis_cache,
     analyze,
 )
 
@@ -172,7 +172,7 @@ class TestAnalysisCache:
     def test_save_and_load_roundtrip(self, tmp_path):
         result = _make_result()
         _save_analysis_cache(result, tmp_path)
-        loaded = _load_analysis_cache(tmp_path)
+        loaded = load_analysis_cache(tmp_path)
 
         assert loaded is not None
         assert loaded.title_summary == "A great video about Python"
@@ -182,12 +182,12 @@ class TestAnalysisCache:
         assert loaded.language == "en"
 
     def test_load_missing_file(self, tmp_path):
-        result = _load_analysis_cache(tmp_path)
+        result = load_analysis_cache(tmp_path)
         assert result is None
 
 
 class TestAnalyze:
-    @patch("core.analysis._load_analysis_cache")
+    @patch("core.analysis.load_analysis_cache")
     def test_uses_cache(self, mock_load_cache, tmp_path):
         cached = _make_result(title_summary="Cached")
         mock_load_cache.return_value = cached

@@ -1,6 +1,8 @@
 """HTML page generation using Jinja2 templates."""
 
+import json
 import logging
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
@@ -11,6 +13,61 @@ from core.ingestion import VideoMetadata
 from prompts.video_analysis import VideoAnalysisResult
 
 logger = logging.getLogger(__name__)
+
+METADATA_FILENAME = "metadata.json"
+
+_jinja_env = None
+
+
+def _get_jinja_env() -> Environment:
+    """Return a module-level singleton Jinja2 Environment."""
+    global _jinja_env
+    if _jinja_env is None:
+        _jinja_env = Environment(
+            loader=FileSystemLoader(str(TEMPLATES_DIR)),
+            autoescape=True,
+        )
+    return _jinja_env
+
+
+def save_metadata(metadata: VideoMetadata, output_dir: Path) -> None:
+    """Serialize VideoMetadata to metadata.json in the output directory."""
+    path = output_dir / METADATA_FILENAME
+    path.write_text(json.dumps(asdict(metadata), ensure_ascii=False, indent=2), encoding="utf-8")
+    logger.debug(f"Metadata saved to {path}")
+
+
+def load_metadata(output_dir: Path) -> VideoMetadata | None:
+    """Load VideoMetadata from metadata.json, or None if missing/corrupt."""
+    path = output_dir / METADATA_FILENAME
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return VideoMetadata(**data)
+    except Exception as e:
+        logger.warning(f"Failed to load metadata: {e}")
+        return None
+
+
+def render_summary_html(
+    metadata: VideoMetadata,
+    analysis: VideoAnalysisResult,
+    output_dir: Path,
+) -> str:
+    """Render summary HTML from metadata + analysis without writing to disk."""
+    cards_dir = output_dir / "cards"
+    card_paths = sorted(cards_dir.glob("card-*.webp")) if cards_dir.exists() else []
+
+    og_path = output_dir / "og-thumbnail.png"
+    og_filename = og_path.name if og_path.exists() else "og-thumbnail.png"
+
+    context = _build_template_context(
+        metadata, analysis, card_paths, og_filename, output_dir
+    )
+
+    template = _get_jinja_env().get_template("summary_page.html")
+    return template.render(**context)
 
 
 def _format_duration(seconds: int) -> str:
@@ -106,11 +163,7 @@ def generate_page(
     output_dir: Path,
 ) -> Path:
     """Generate the HTML summary page."""
-    env = Environment(
-        loader=FileSystemLoader(str(TEMPLATES_DIR)),
-        autoescape=True,
-    )
-    template = env.get_template("summary_page.html")
+    template = _get_jinja_env().get_template("summary_page.html")
 
     og_filename = og_path.name
     context = _build_template_context(

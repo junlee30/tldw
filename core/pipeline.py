@@ -11,7 +11,7 @@ from core.analysis import analyze
 from core.extraction import extract_frames
 from core.composition import compose_all_cards
 from core.og_image import generate_og_image
-from core.page_generator import generate_page
+from core.page_generator import generate_page, save_metadata
 from prompts.video_analysis import VideoAnalysisResult
 
 logger = logging.getLogger(__name__)
@@ -64,6 +64,7 @@ def run_pipeline(youtube_url: str) -> PipelineResult:
 
     metadata = result.metadata
     video_path = result.video_path
+    save_metadata(metadata, output_dir)
 
     try:
         # Step 3: Analyze

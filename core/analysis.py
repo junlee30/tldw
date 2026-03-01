@@ -116,7 +116,7 @@ def _save_analysis_cache(result: VideoAnalysisResult, output_dir: Path) -> None:
     logger.debug(f"Analysis cached to {cache_path}")
 
 
-def _load_analysis_cache(output_dir: Path) -> VideoAnalysisResult | None:
+def load_analysis_cache(output_dir: Path) -> VideoAnalysisResult | None:
     """Load analysis result from JSON cache if it exists."""
     cache_path = output_dir / CACHE_FILENAME
     if not cache_path.exists():
@@ -146,7 +146,7 @@ def analyze(
 ) -> VideoAnalysisResult:
     """Main analysis entry point: cache check -> upload -> analyze -> cache -> cleanup."""
     # Check cache first
-    cached = _load_analysis_cache(output_dir)
+    cached = load_analysis_cache(output_dir)
     if cached is not None:
         return cached
 

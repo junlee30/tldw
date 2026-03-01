@@ -20,7 +20,7 @@ core/
   extraction.py        # ffmpeg: extract frames at timestamps, pick sharpest (Laplacian)
   composition.py       # Pillow: resize frames to 1280x720 WebP cards
   og_image.py          # Pillow: 1200x630 OG thumbnail with branding overlay
-  page_generator.py    # Jinja2: render summary HTML page
+  page_generator.py    # Jinja2: render summary HTML page, metadata persistence
 prompts/
   video_analysis.py    # Pydantic models + Gemini prompt template
 web/
@@ -35,19 +35,21 @@ templates/
   summary_page.html    # Self-contained dark-theme summary output
   web/                 # Web app templates (home, login, job status)
 assets/                # Fonts (Inter), watermark overlay, favicon
-tests/                 # 60+ unit tests (ingestion, analysis, extraction, composition, page gen)
+tests/                 # 75+ unit tests (ingestion, analysis, extraction, composition, page gen)
 ```
 
 ## Pipeline Flow
 
-1. **Ingest** — yt-dlp downloads video (480p max), extracts metadata
+1. **Ingest** — yt-dlp downloads video (480p max), extracts metadata, saves `metadata.json`
 2. **Analyze** — Upload to Gemini File API, analyze with structured prompt, cache as `analysis.json`
 3. **Extract Frames** — ffmpeg pulls frames at each segment timestamp, picks sharpest
 4. **Compose Cards** — Resize frames to 1280x720 WebP
 5. **Generate OG Image** — Darken frame + gradient + brand pill + title
 6. **Generate HTML** — Jinja2 render with scenes, narration, YouTube timestamp links
 
-Output goes to `output/{video_id}/` (index.html, og-thumbnail.png, cards/, frames/, analysis.json).
+Output goes to `output/{video_id}/` (index.html, metadata.json, og-thumbnail.png, cards/, frames/, analysis.json).
+
+**Dynamic rendering:** The web app renders summary pages dynamically from `metadata.json` + `analysis.json` on each request, so template changes apply to all summaries without regeneration. CLI still produces standalone `index.html`. Old output dirs without `metadata.json` fall back to serving the static `index.html`.
 
 ## Environment Variables (.env)
 
