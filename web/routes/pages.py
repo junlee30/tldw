@@ -6,7 +6,7 @@ from fastapi import APIRouter, Form, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 
-from config import OUTPUT_DIR, TEMPLATES_DIR
+from config import OUTPUT_DIR, TEMPLATES_DIR, FAVICON_PATH
 from core.analysis import load_analysis_cache
 from core.page_generator import load_metadata, render_summary_html
 from web.auth import verify_password, create_session_token, COOKIE_NAME
@@ -14,6 +14,11 @@ from web.db import get_job, list_jobs, find_job_by_video_id
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(FAVICON_PATH, media_type="image/x-icon")
 
 
 @router.get("/login", response_class=HTMLResponse)

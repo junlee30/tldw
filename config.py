@@ -24,7 +24,8 @@ FONT_BOLD = FONTS_DIR / "Inter-Bold.ttf"
 FONT_REGULAR = FONTS_DIR / "Inter-Regular.ttf"
 FONT_CJK = FONTS_DIR / "NotoSansKR.ttf"
 WATERMARK_PATH = OVERLAYS_DIR / "tldw_watermark.png"
-FAVICON_PATH = ASSETS_DIR / "favicon.ico"
+STATIC_DIR = PROJECT_ROOT / "web" / "static"
+FAVICON_PATH = STATIC_DIR / "favicon.ico"
 
 # --- API ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
