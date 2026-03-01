@@ -75,6 +75,11 @@ def _run_job(job_id: str, youtube_url: str) -> None:
             thumbnail_url=result.metadata.thumbnail_url,
             completed_at=datetime.now(timezone.utc).isoformat(),
         )
+        try:
+            from web.telegram import notify_job_completed
+            notify_job_completed(result.metadata.title, result.video_id)
+        except Exception:
+            pass
     except Exception as e:
         logging.getLogger(__name__).exception(f"Job {job_id} failed: {e}")
         update_job(
@@ -83,6 +88,11 @@ def _run_job(job_id: str, youtube_url: str) -> None:
             error=str(e),
             step="",
         )
+        try:
+            from web.telegram import notify_job_failed
+            notify_job_failed(youtube_url, str(e))
+        except Exception:
+            pass
     finally:
         pipeline_logger.removeHandler(handler)
         _semaphore.release()

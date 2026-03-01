@@ -56,6 +56,10 @@ YTDLP_FORMAT = "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=
 YTDLP_RETRIES = 3
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "")  # path to Netscape-format cookies.txt
 
+# --- Telegram notifications ---
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
 # --- Retry ---
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
