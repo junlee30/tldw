@@ -33,6 +33,7 @@ def _run_job(job_id: str, youtube_url: str) -> None:
 
     # Attach progress handler to the pipeline logger
     pipeline_logger = logging.getLogger("core.pipeline")
+    pipeline_logger.setLevel(logging.INFO)
     handler = JobProgressHandler(job_id)
     handler.setLevel(logging.INFO)
     pipeline_logger.addHandler(handler)
