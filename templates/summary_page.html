@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} — TL;DW</title>
+    <meta name="description" content="{{ prologue[:160] }}">
+    <link rel="canonical" href="{{ canonical_url }}">
     <link rel="icon" href="/static/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
     <!-- OG Tags -->
+    <meta property="og:url" content="{{ canonical_url }}">
     <meta property="og:type" content="article">
     <meta property="og:title" content="{{ title_summary }}">
     <meta property="og:description" content="{{ prologue }}">

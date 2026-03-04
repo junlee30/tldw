@@ -1,12 +1,14 @@
 """HTML page routes and summary file serving."""
 
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Form, Request, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, FileResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from config import OUTPUT_DIR, TEMPLATES_DIR, FAVICON_PATH
+from config import BASE_URL, OUTPUT_DIR, TEMPLATES_DIR, FAVICON_PATH
 from core.analysis import load_analysis_cache
 from core.page_generator import load_metadata, render_summary_html
 from web.auth import verify_password, create_session_token, COOKIE_NAME
@@ -19,6 +21,52 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 @router.get("/favicon.ico", include_in_schema=False)
 async def favicon():
     return FileResponse(FAVICON_PATH, media_type="image/x-icon")
+
+
+@router.get("/robots.txt", include_in_schema=False)
+async def robots_txt():
+    body = (
+        "User-agent: *\n"
+        "Allow: /s/\n"
+        "Disallow: /login\n"
+        "Disallow: /auth/\n"
+        "Disallow: /api/\n"
+        "Disallow: /jobs/\n"
+        "\n"
+        f"Sitemap: {BASE_URL}/sitemap.xml\n"
+    )
+    return PlainTextResponse(body)
+
+
+@router.get("/sitemap.xml", include_in_schema=False)
+async def sitemap_xml():
+    urls = []
+    if OUTPUT_DIR.is_dir():
+        for subdir in sorted(OUTPUT_DIR.iterdir()):
+            meta_path = subdir / "metadata.json"
+            if not meta_path.is_file():
+                continue
+            try:
+                data = json.loads(meta_path.read_text(encoding="utf-8"))
+                video_id = data.get("video_id", subdir.name)
+            except Exception:
+                video_id = subdir.name
+            mtime = datetime.fromtimestamp(meta_path.stat().st_mtime, tz=timezone.utc)
+            urls.append((video_id, mtime.strftime("%Y-%m-%d")))
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for video_id, lastmod in urls:
+        lines.append("  <url>")
+        lines.append(f"    <loc>{BASE_URL}/s/{video_id}/</loc>")
+        lines.append(f"    <lastmod>{lastmod}</lastmod>")
+        lines.append("    <changefreq>never</changefreq>")
+        lines.append("  </url>")
+    lines.append("</urlset>")
+
+    return Response(content="\n".join(lines), media_type="application/xml")
 
 
 @router.get("/login", response_class=HTMLResponse)

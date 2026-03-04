@@ -8,7 +8,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-from config import TEMPLATES_DIR
+from config import BASE_URL, TEMPLATES_DIR
 from core.ingestion import VideoMetadata
 from prompts.video_analysis import VideoAnalysisResult
 
@@ -152,6 +152,7 @@ def _build_template_context(
         "video_id": metadata.video_id,
         "thumbnail_url": metadata.thumbnail_url,
         "reading_time": f"{reading_minutes} min read",
+        "canonical_url": f"{BASE_URL}/s/{metadata.video_id}/",
     }
 
 

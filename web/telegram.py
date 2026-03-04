@@ -2,7 +2,7 @@
 
 import logging
 
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from config import BASE_URL, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def notify_job_completed(video_title: str, video_id: str) -> None:
     message = (
         f"\u2705 Summary ready!\n\n"
         f"{video_title}\n"
-        f"https://tldwapp.com/s/{video_id}/"
+        f"{BASE_URL}/s/{video_id}/"
     )
     send_notification(message)
 

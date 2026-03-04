@@ -16,6 +16,7 @@ TEMPLATES_DIR = PROJECT_ROOT / "templates"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
 # --- Web app ---
+BASE_URL = os.getenv("BASE_URL", "https://tldwapp.com").rstrip("/")
 TLDW_PASSWORD = os.getenv("TLDW_PASSWORD", "")
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-production")
 DATABASE_PATH = os.getenv("DATABASE_PATH", str(OUTPUT_DIR / "tldw.db"))
