@@ -65,8 +65,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        # Allow public paths and static files
-        if path in PUBLIC_PATHS or path.startswith("/static"):
+        # Allow public paths, static files, and summary pages
+        if (
+            path in PUBLIC_PATHS
+            or path.startswith("/static")
+            or path.startswith("/s/")
+            or path in ("/robots.txt", "/sitemap.xml", "/favicon.ico")
+        ):
             return await call_next(request)
 
         # Check session cookie
