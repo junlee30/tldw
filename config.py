@@ -54,7 +54,7 @@ FILE_UPLOAD_POLL_INTERVAL = 5  # seconds
 FILE_UPLOAD_TIMEOUT = 600  # 10 minutes
 
 # --- yt-dlp ---
-YTDLP_FORMAT = "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best"
+YTDLP_FORMAT = "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best"
 YTDLP_RETRIES = 3
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE", "")  # path to Netscape-format cookies.txt
 

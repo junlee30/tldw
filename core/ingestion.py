@@ -75,6 +75,7 @@ def fetch_metadata(url: str) -> VideoMetadata:
         "skip_download": True,
         "quiet": True,
         "no_warnings": True,
+        "ignore_no_formats_error": True,
         "js_runtimes": {"node": {}},
     }
     if YTDLP_COOKIES_FILE:
