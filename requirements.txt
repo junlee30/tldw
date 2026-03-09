@@ -1,5 +1,5 @@
 google-genai>=1.0.0
-yt-dlp>=2024.0.0
+yt-dlp>=2026.3.3
 yt-dlp-ejs
 Pillow>=10.0.0
 jinja2>=3.1.0
