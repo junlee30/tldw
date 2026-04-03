@@ -71,7 +71,7 @@ async def sitemap_xml():
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("web/login.html", context={"request": request})
+    return templates.TemplateResponse(request, "web/login.html")
 
 
 @router.post("/auth/login")
@@ -115,8 +115,7 @@ async def home(request: Request):
                     **job,
                     "thumbnail": thumbnail,
                 })
-    return templates.TemplateResponse("web/home.html", context={
-        "request": request,
+    return templates.TemplateResponse(request, "web/home.html", context={
         "summaries": summaries,
         "jobs": [j for j in jobs if j["status"] in ("pending", "processing")],
     })
@@ -127,8 +126,7 @@ async def job_status_page(request: Request, job_id: str):
     job = get_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
-    return templates.TemplateResponse("web/job_status.html", context={
-        "request": request,
+    return templates.TemplateResponse(request, "web/job_status.html", context={
         "job": job,
     })
 
